@@ -1,0 +1,32 @@
+#----------------------------------------
+# Rutulys compiler config file
+#----------------------------------------
+
+# Path
+#---------------------------------------
+
+# Cache output directory (should be writable)
+outputpath: './www'
+
+# WWW rbase path (Must be same location as `outputpath`)
+baseuri: 'http://www.example.com/path/to/base'
+
+# Backup directly to store older cache file
+backuppath: './www/.backup'
+
+
+# Settings
+#---------------------------------------
+
+# Extension not to interpret as a part of the title
+ignore_ext: '*.md'
+
+# Extension to add the output file
+cache_ext: '.html'
+
+# Used for strftime in generating HTML
+timeformat: '%b %-d, %Y %H:%M:%S %Z'
+
+# Suffix of generator
+generator: ''
+
