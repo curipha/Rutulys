@@ -107,8 +107,7 @@ I'm **sure** that the day you use this backup will come.
 
 You can use symbolic link when pre-defined file is located at another location.
 
-Check `config.sample.yaml` and `template.sample.html`.
-They are sample files for `config.yaml` and `template.html`.
+Check `config.yaml` and `template.html` files in `sample` directory.
 
 #### config.yaml
 Rutulys configuration file.
