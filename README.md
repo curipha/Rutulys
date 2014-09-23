@@ -115,16 +115,20 @@ Used for a HTML template.
 
 There are some placeholder to be replaced.
 
-- `%{title}`
-- `%{author}`
+- `%{title}` Title placeholder
+  - `<title>%{title} | Your Site Name</title>`
 - `%{generator}`
-- `%{stylesheet}`
+  - `<meta name="generator" content="%{generator}" />`
 - `%{baseuri}`
+  - `<base href="%{baseuri}" />`
+- `%{stylesheet}`
+  - `<link rel="stylesheet" type="text/css" href="%{stylesheet}" />`
 - `%{canonical}`
-- `%{modified}`
-- `%{next}`
-- `%{prev}`
-- `%{content}`
+  - `<link rel="canonical" href="%{canonical}" />`
+- `%{next}`, `%{prev}`
+  - `<div id="nav"><div id="next">%{next}</div><div id="prev">%{prev}</div></div>`
+- `%{content}`, `%{modified}`
+  - `<div id="main"><div class="date">%{modified}</div>%{content}</div>`
 
 #### style.css
 Used for style sheet.
