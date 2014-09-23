@@ -265,7 +265,7 @@ HELP
 
     # Create symbolic link to newest cache
     @@FileUtils.rm_f("#{@outputpath}/index.html")
-    @@FileUtils.ln_s(@index.first[:cpath], "#{@outputpath}/index.html")
+    @@FileUtils.ln_s(File.basename(@index.first[:cpath]), "#{@outputpath}/index.html")
   end
   #}}}
   # clean       : Remove all cache(s)  which is not listed in index {{{
