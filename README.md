@@ -115,20 +115,65 @@ Used for a HTML template.
 
 There are some placeholder to be replaced.
 
-- `%{title}` Title placeholder
-  - `<title>%{title} | Your Site Name</title>`
-- `%{generator}`
-  - `<meta name="generator" content="%{generator}" />`
-- `%{baseuri}`
-  - `<base href="%{baseuri}" />`
-- `%{stylesheet}`
-  - `<link rel="stylesheet" type="text/css" href="%{stylesheet}" />`
-- `%{canonical}`
-  - `<link rel="canonical" href="%{canonical}" />`
-- `%{next}`, `%{prev}`
-  - `<div id="nav"><div id="next">%{next}</div><div id="prev">%{prev}</div></div>`
-- `%{content}`, `%{modified}`
-  - `<div id="main"><div class="date">%{modified}</div>%{content}</div>`
+##### `%{title}`
+It will be replaced by the file name of source file without specified extension string.
+
+```HTML
+<title>%{title} | Your Site Name</title>
+```
+
+##### `%{generator}`
+It will be replaced by the string of the application fingerprint.
+
+```HTML
+<meta name="generator" content="%{generator}" />
+```
+
+##### `%{baseuri}`
+It will be replaced by the string you specify at `config.yaml`.
+This is very important to find `style.css` by a browser.
+
+```HTML
+<base href="%{baseuri}" />
+```
+
+##### `%{stylesheet}`
+It will be replaced by the path to `style.css`.
+
+```HTML
+<link rel="stylesheet" type="text/css" href="%{stylesheet}" />
+```
+
+##### `%{canonical}`
+It will be replaced by the canonical URI to this document.
+This string is prepared for search engine bot.
+
+```HTML
+<link rel="canonical" href="%{canonical}" />
+```
+
+##### `%{next}`, `%{prev}`
+It will be replaced by the navigation link.
+
+If it is the newest or oldest file, the text will be blank.
+Use `:empty` pseudo-class to hide the element.
+
+```HTML
+<div id="nav">
+  <div id="next">%{next}</div>
+  <div id="prev">%{prev}</div>
+</div>
+```
+
+##### `%{content}`, `%{modified}`
+It will be replaced by the modified time string of a source file and main content text.
+
+```HTML
+<div id="article">
+  <div class="date">%{modified}</div>
+  <div class="main">%{content}</div>
+</div>
+```
 
 #### style.css
 Used for style sheet.
