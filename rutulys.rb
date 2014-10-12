@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -Ku
+#!/usr/bin/env ruby
 #  ___      _        _
 # | _ \_  _| |_ _  _| |_  _ ___
 # |   / || |  _| || | | || (_-<
@@ -406,12 +406,13 @@ HELP
 
 end
 
+if __FILE__ == $0
+  rc = Rutulys.new
 
-rc = Rutulys.new
-
-case ARGV[0]
-when 'add'     then rc.add
-when 'rebuild' then rc.rebuild
-else                rc.help
+  case ARGV[0]
+  when 'add'     then rc.add
+  when 'rebuild' then rc.rebuild
+  else                rc.help
+  end
 end
 
