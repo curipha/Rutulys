@@ -240,7 +240,6 @@ HELP
     err "Empty cache file will be created for #{entry[:path]}" if content.empty?
 
     fputs(entry[:cpath], build_page(entry, content))
-    File.utime(entry[:mtime], entry[:mtime], entry[:cpath]) if MODE == :release
 
     msg "Created a cache file for #{entry[:path]}"
   end
