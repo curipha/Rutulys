@@ -4,18 +4,17 @@ require '../rutulys.rb'
 
 require 'rubygems'
 require 'redcarpet'
-require 'pygments.rb'
+require 'rouge'
+require 'rouge/plugins/redcarpet'
 
 class MyRedcarpet < Redcarpet::Render::XHTML
+  include Rouge::Plugins::Redcarpet
+
   def header(text, level)
     h_offset = 2
     level = level < ( 6 - h_offset ) ? level + h_offset : 6
 
     return "<h#{level}>#{text}</h#{level}>"
-  end
-
-  def block_code(code, language)
-    return Pygments.highlight(code, lexer: language)
   end
 end
 
