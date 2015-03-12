@@ -45,9 +45,12 @@ HELP
     initiate
     autognosis
     loadconfig
+
     indexer
     navindexer
+
     generator(@index)
+    setasset
 
     msgb 'I did everything I could :)'
   end
@@ -75,12 +78,8 @@ HELP
     # HTML build cache
     @html_template, @html_author, @html_generator, @html_base = nil, nil, nil, nil
 
-
     # Internal settings
-    @ignore_src = [File.basename(__FILE__), 'config.yaml', 'template.html']  # Ignore files in @sourcepath
-
     @sourcepath = Dir.pwd # Source directory
-
 
     # Prepare mode-based environment
     case MODE
@@ -109,8 +108,6 @@ HELP
     err << "Template file (#{templatepath.inspect}) does not exist."        unless File.exist?(templatepath)
     err << "Template file (#{templatepath.inspect}) should be readable."    unless File.readable?(templatepath)
 
-    err << "@ignore_out (#{@ignore_out.inspect}) should be an Array." unless @ignore_out.is_a?(Array)
-    err << "@ignore_src (#{@ignore_src.inspect}) should be an Array." unless @ignore_src.is_a?(Array)
 
     msg.each {|m| msg(m) } unless msg.empty?
     err.each {|m| err(m) } unless err.empty?
@@ -153,9 +150,9 @@ HELP
   # indexer     : Get an index for source file(s) {{{
   def indexer
     list = []
-    Dir.glob("#{@sourcepath}/*") {|f|
+    Dir.glob("#{@sourcepath}/library/*", File::FNM_DOTMATCH) {|f|
       next unless File.file?(f)
-      next unless @ignore_src.index(File.basename(f)).nil?
+      next unless File.readable?(f)
 
       file = f.encode(Encoding::UTF_8)
       path = File.absolute_path(file, File.dirname(@sourcepath))
@@ -223,6 +220,13 @@ HELP
     @@FileUtils.ln_s(File.basename(@index.first[:cpath]), "#{@deploypath}/index.html")
   end
   #}}}
+  # setasset    : Copy asset files to deploying point {{{
+  def setasset(list)
+    return unless File.directory?("#{@sourcepath}/asset")
+
+    FileUtils.cp_r(Dir.glob(["#{@sourcepath}/asset/*", "#{@sourcepath}/asset/.[^.]*"]), "#{@deploypath}")
+  end
+  #}}}
 
   # create_cache: Create cache file {{{
   def create_cache(entry)
@@ -257,7 +261,7 @@ HELP
 
   # cachepath   : Get path to a cache file {{{
   def cachepath(cache)
-    return "#{@deploypath}/#{cache}.html"
+    return "#{@deploypath}/archive/#{cache}.html"
   end
   #}}}
   # configpath  : Get path to the configuration file {{{
