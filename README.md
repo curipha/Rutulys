@@ -133,20 +133,20 @@ If it is the newest or oldest file, the text will be blank.
 Use `:empty` pseudo-class to hide the element.
 
 ```HTML
-<div id="nav">
+<nav>
   <div id="next">%{next}</div>
   <div id="prev">%{prev}</div>
-</div>
+</nav>
 ```
 
 ##### `%{content}`, `%{modified}`
 It will be replaced by the modified time string of a source file and main content text.
 
 ```HTML
-<div id="article">
+<article>
   <div class="date">%{modified}</div>
   <div class="main">%{content}</div>
-</div>
+</article>
 ```
 
 #### index.html
