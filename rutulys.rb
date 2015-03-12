@@ -127,7 +127,7 @@ HELP
     config = YAML.load(File.read(configpath, mode: 'rb:utf-8'))
 
     # Paths
-    @outputpath = config['outputpath']  # Cache output directory
+    @deploypath = config['deploypath']  # Deploy directory
 
     # Settings
     @timeformat = config['timeformat']  # Used for strftime in generating HTML
@@ -136,14 +136,14 @@ HELP
     # Site customize
     @title    = config['title']
     @author   = config['author']
-    @baseuri  = config['baseuri']  # Must be same location as @outputpath
+    @baseuri  = config['baseuri']  # Must be same location as @deploypath
 
 
     # Validation
     err = []
 
-    err << "Output directory (#{@outputpath.inspect}) does not exist."     unless Dir.exist?(@outputpath)
-    err << "Output directory (#{@outputpath.inspect}) should be writable." unless File.writable?(@outputpath)
+    err << "Parent directory of deploy point (#{@deploypath.inspect}) does not exist."     unless Dir.exist?(File.dirname(@deploypath))
+    err << "Parent directory of deploy point (#{@deploypath.inspect}) should be writable." unless File.writable?(File.dirname(@deploypath))
 
     err << "Style sheet file (#{stylepath.inspect}) does not exist."        unless File.exist?(stylepath)
     err << "Style sheet file (#{stylepath.inspect}) should be readable."    unless File.readable?(stylepath)
@@ -206,11 +206,11 @@ HELP
   def generator(list)
     abort 'Navigation index has no entry.' if @navigation.empty?
 
-    # Clear the output directory
-    if File.exist?(@outputpath)
-      @@FileUtils.rm_rf(@outputpath)
-      Dir.mkdir(@outputpath)
-      FileUtils.chmod('u+rwx', @outputpath)
+    # Clear the deploy directory
+    if File.exist?(@deploypath)
+      @@FileUtils.rm_rf(@deploypath)
+      Dir.mkdir(@deploypath)
+      FileUtils.chmod('u+rwx', @deploypath)
     end
 
     # Generate caches
@@ -231,7 +231,7 @@ HELP
     threads.each {|t| t.join }
 
     # Create symbolic link to newest cache
-    @@FileUtils.ln_s(File.basename(@index.first[:cpath]), "#{@outputpath}/index.html")
+    @@FileUtils.ln_s(File.basename(@index.first[:cpath]), "#{@deploypath}/index.html")
   end
   #}}}
 
@@ -270,7 +270,7 @@ HELP
 
   # cachepath   : Get path to a cache file {{{
   def cachepath(cache)
-    return "#{@outputpath}/#{cache}.html"
+    return "#{@deploypath}/#{cache}.html"
   end
   #}}}
   # configpath  : Get path to the configuration file {{{
@@ -285,7 +285,7 @@ HELP
   #}}}
   # stylepath   : Get path to the style sheet {{{
   def stylepath
-    return "#{@outputpath}/style.css"
+    return "#{@deploypath}/style.css"
   end
   #}}}
 

@@ -5,8 +5,8 @@
 # Path
 #---------------------------------------
 
-# Cache output directory (should be writable)
-outputpath: './www'
+# Deploy directory (its parent directory must be writable)
+deploypath: './www'
 
 # WWW base path
 baseuri: 'http://www.example.com/path/to/base'
