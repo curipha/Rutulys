@@ -23,6 +23,50 @@ class Rutulys
 
   # initialize  : Constructor {{{
   def initialize
+    case ARGV[0]
+    when 'build' then build
+    else              help
+    end
+  end
+  # }}}
+
+  # help        : Display help message {{{
+  def help
+    abort <<HELP
+Rutulys #{VERSION}
+
+% ./#{File.basename(__FILE__)} [option]
+
+\033[1mOption\033[0m
+build : Create caches for ALL entries
+HELP
+  end
+  #}}}
+  # build       : Build mode {{{
+  #  - create ALL caches for ALL sources
+  def build
+    initiate
+    autognosis
+    loadconfig
+    indexer
+    navindexer
+    generator(@index)
+    clean
+
+    msgb 'I did everything I could :)'
+  end
+  #}}}
+
+  private
+
+  # parser      : Generate a parsed string (override me) {{{
+  def parser(str)
+    return str
+  end
+  #}}}
+
+  # initiate    : Initiate myself {{{
+  def initiate
     # Internal variables
     @now = Time.now
     @mutex = Mutex.new  # Giant lock ;p
@@ -52,54 +96,8 @@ class Rutulys
       @threads = 1  # Force single thread
       @@FileUtils = FileUtils::DryRun
     end
-
-    # Prepare a bit of this and that
-    autognosis
-    loadconfig
-    indexer
-  end
-  # }}}
-
-  # help        : Display help message {{{
-  def help
-print <<'TITLE'
- ___      _        _
-| _ \_  _| |_ _  _| |_  _ ___
-|   / || |  _| || | | || (_-<
-|_|_\\_,_|\__|\_,_|_|\_, /__/
-                     |__/
-TITLE
-    print <<HELP
- #{VERSION}
-
-% ./#{__FILE__} [option]
-
-\033[1mOption\033[0m
-build : Create caches for ALL entries
-HELP
-
-    abort
   end
   #}}}
-  # build       : Build mode {{{
-  #  - create ALL caches for ALL sources
-  def build
-    navindexer
-    generator(@index)
-    clean
-
-    msgb 'I did everything I could :)'
-  end
-  #}}}
-
-  private
-
-  # parser      : Generate a parsed string (override me) {{{
-  def parser(str)
-    return str
-  end
-  #}}}
-
   # autognosis  : Check for primitive preferences {{{
   def autognosis
     msg, err = [], []
@@ -364,12 +362,5 @@ HELP
 
 end
 
-if __FILE__ == $0
-  rc = Rutulys.new
-
-  case ARGV[0]
-  when 'build' then rc.build
-  else              rc.help
-  end
-end
+Rutulys.new
 

@@ -41,10 +41,5 @@ class MyRutulys < Rutulys
 end
 
 
-mr = MyRutulys.new
-
-case ARGV[0]
-when 'build' then mr.build
-else              mr.help
-end
+MyRutulys.new
 
