@@ -73,7 +73,7 @@ HELP
     @navigation = {} # Internal index for building navigation
 
     # HTML build cache
-    @html_template, @html_author, @html_generator, @html_css, @html_base = nil, nil, nil, nil, nil
+    @html_template, @html_author, @html_generator, @html_base = nil, nil, nil, nil
 
 
     # Internal settings
@@ -241,7 +241,6 @@ HELP
                     title:      htmlstr("#{entry[:name]}"),
                     generator:  @html_generator ||= htmlstr("Rutulys/#{VERSION} (UTF-8) #{@generator}".strip),
                     baseuri:    @html_base      ||= htmlstr(@baseuri),
-                    stylesheet: @html_css       ||= htmlstr("style.css?#{File.mtime(stylepath).tv_sec.to_s}"),
                     canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
                     modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
                     next:       build_nav(@navigation[entry[:path]][:next]),
@@ -269,11 +268,6 @@ HELP
   # templatepath: Get path to the template file {{{
   def templatepath
     return "#{@sourcepath}/template.html"
-  end
-  #}}}
-  # stylepath   : Get path to the style sheet {{{
-  def stylepath
-    return "#{@deploypath}/style.css"
   end
   #}}}
 
