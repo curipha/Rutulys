@@ -50,7 +50,6 @@ HELP
     indexer
     navindexer
     generator(@index)
-    clean
 
     msgb 'I did everything I could :)'
   end
@@ -80,7 +79,6 @@ HELP
 
 
     # Internal settings
-    @ignore_out = [File.basename(__FILE__), 'index.html', 'style.css']       # Ignore files in @outputpath
     @ignore_src = [File.basename(__FILE__), 'config.yaml', 'template.html']  # Ignore files in @sourcepath
 
     @sourcepath = Dir.pwd # Source directory
@@ -208,6 +206,14 @@ HELP
   def generator(list)
     abort 'Navigation index has no entry.' if @navigation.empty?
 
+    # Clear the output directory
+    if File.exist?(@outputpath)
+      @@FileUtils.rm_rf(@outputpath)
+      Dir.mkdir(@outputpath)
+      FileUtils.chmod('u+rwx', @outputpath)
+    end
+
+    # Generate caches
     queue = Queue.new
     list.each {|l| queue.push(l) }
 
@@ -225,24 +231,7 @@ HELP
     threads.each {|t| t.join }
 
     # Create symbolic link to newest cache
-    @@FileUtils.rm_f("#{@outputpath}/index.html")
     @@FileUtils.ln_s(File.basename(@index.first[:cpath]), "#{@outputpath}/index.html")
-  end
-  #}}}
-  # clean       : Remove all cache(s)  which is not listed in index {{{
-  def clean
-    # Get a list of all cache file
-    in_cache = []
-    Dir.glob("#{@outputpath}/*") {|f|
-      in_cache << File.basename(f) if File.file?(f)
-    }
-
-    # Clear cache files which is not listed in the index
-    remove = in_cache - @index.map {|i| File.basename(i[:cpath]) } - @ignore_out
-    remove.each {|c|
-      msg "Clean up cache #{c}"
-      @@FileUtils.rm_f(cachepath(c))
-    }
   end
   #}}}
 
