@@ -19,9 +19,6 @@ How to use
 
 ### Command
 
-#### `add`
-Process newly added source file(s) only.
-
 #### `rebuild`
 All files in source directory will be processed.
 

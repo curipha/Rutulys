@@ -77,9 +77,7 @@ TITLE
 % ./#{__FILE__} [option]
 
 \033[1mOption\033[0m
-add     : Add new entry to cache
 rebuild : Create caches for ALL entries
-            * for when rename, remove, change older entry
 HELP
 
     abort
@@ -91,32 +89,6 @@ HELP
     navindexer
     generator(@index)
     clean
-
-    msgb 'I did everything I could :)'
-  end
-  #}}}
-  # add         : Add mode {{{
-  #  - Create cache for new entry
-  #  - Do NOT use this method for creating cache after renaming, removing and/or updating older entry
-  def add
-    # Build a queue to create cache(s) which is already invalidated or does not exist.
-    queue = []
-    current_newest = 0
-    @index.each_with_index {|i, n|
-      queue << i
-
-      if File.exist?(i[:cpath])
-        current_newest = n
-        break
-      end
-    }
-
-    if queue.empty?
-      err 'There is no file to generate any caches.'
-    else
-      navindexer(@index[0..(current_newest + 1)])
-      generator(queue)
-    end
 
     msgb 'I did everything I could :)'
   end
@@ -410,7 +382,6 @@ if __FILE__ == $0
   rc = Rutulys.new
 
   case ARGV[0]
-  when 'add'     then rc.add
   when 'rebuild' then rc.rebuild
   else                rc.help
   end
