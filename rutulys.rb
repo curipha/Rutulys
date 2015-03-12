@@ -281,12 +281,12 @@ HELP
   # build_page  : Build a HTML of cache {{{
   def build_page(entry, content)
     return sprintf(@html_template ||= File.read(templatepath, mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1'),
-                    title:      CGI.escapeHTML("#{entry[:name]}"),
-                    generator:  @html_generator ||= CGI.escapeHTML("Rutulys/#{VERSION} (UTF-8) #{@generator}".strip),
-                    baseuri:    @html_base      ||= CGI.escapeHTML(@baseuri),
-                    stylesheet: @html_css       ||= CGI.escapeHTML("style.css?#{File.mtime(stylepath).tv_sec.to_s}"),
-                    canonical:  CGI.escapeHTML("#{@baseuri}/#{entry[:cache]}"),
-                    modified:   CGI.escapeHTML(entry[:mtime].strftime(@timeformat)),
+                    title:      htmlstr("#{entry[:name]}"),
+                    generator:  @html_generator ||= htmlstr("Rutulys/#{VERSION} (UTF-8) #{@generator}".strip),
+                    baseuri:    @html_base      ||= htmlstr(@baseuri),
+                    stylesheet: @html_css       ||= htmlstr("style.css?#{File.mtime(stylepath).tv_sec.to_s}"),
+                    canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
+                    modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
                     next:       build_nav(@navigation[entry[:path]][:next]),
                     prev:       build_nav(@navigation[entry[:path]][:prev]),
                     content:    content
@@ -295,7 +295,7 @@ HELP
   #}}}
   # build_nav   : Build a navigation link {{{
   def build_nav(nav)
-    return nav.nil? ? '<!-- n/a -->' : "<a href=\"#{CGI.escapeHTML(nav[:cache])}\">#{CGI.escapeHTML(nav[:name])}</a>"
+    return nav.nil? ? '<!-- n/a -->' : "<a href=\"#{htmlstr(nav[:cache])}\">#{htmlstr(nav[:name])}</a>"
   end
   #}}}
 
@@ -322,6 +322,12 @@ HELP
   # stylepath   : Get path to the style sheet {{{
   def stylepath
     return "#{@outputpath}/style.css"
+  end
+  #}}}
+
+  # htmlstr     : Get HTML-escaped string {{{
+  def htmlstr(str)
+    return CGI.escapeHTML(str)
   end
   #}}}
 
