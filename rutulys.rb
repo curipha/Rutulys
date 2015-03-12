@@ -121,7 +121,6 @@ HELP
 
     # Settings
     @timeformat = config['timeformat']  # Used for strftime in generating HTML
-    @generator  = config['generator']   # Suffix of generator
 
     # Site customize
     @title    = config['title']
