@@ -77,15 +77,15 @@ TITLE
 % ./#{__FILE__} [option]
 
 \033[1mOption\033[0m
-rebuild : Create caches for ALL entries
+build : Create caches for ALL entries
 HELP
 
     abort
   end
   #}}}
-  # rebuild     : Rebuild mode {{{
+  # build       : Build mode {{{
   #  - create ALL caches for ALL sources
-  def rebuild
+  def build
     navindexer
     generator(@index)
     clean
@@ -382,8 +382,8 @@ if __FILE__ == $0
   rc = Rutulys.new
 
   case ARGV[0]
-  when 'rebuild' then rc.rebuild
-  else                rc.help
+  when 'build' then rc.build
+  else              rc.help
   end
 end
 

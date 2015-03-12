@@ -19,15 +19,8 @@ How to use
 
 ### Command
 
-#### `rebuild`
-All files in source directory will be processed.
-
-In case of follows, use this mode.
-
-- Update `template.html`
-- Remove/Change/Rename existing source file
-
-Otherwise, it will be inconsistent.
+#### `build`
+Build the whole website.
 
 ### Wording
 
