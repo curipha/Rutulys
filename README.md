@@ -24,30 +24,30 @@ Build the whole website.
 
 ### Wording
 
-#### Output path
-As known as `@outputpath`.
+#### Deploy path (Deploying point)
+As known as `@deploypath`.
 
-Processed files (maybe HTML files) will be outputted to this directory.
-This directory MUST be writable by Rutulys.
+Processed files will be outputted to this directory.
+A parent directory of this path MUST be writable by Rutulys.
 
 `index.html` will be created in this directory automatically.
-`style.css` should be created here.
 
-Processed file name is converted from original one to URL-encoded string.
+Cache file name is converted from original one to URL-encoded string.
 As a character encoding, we use UTF-8.
 (e.g. `あいうえお` will be `%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A`.)
 
 #### Source path
 As known as `@sourcepath`.
 
-Original text file should be in this directory.
+Original text file should be in `library` directory of this directory.
 The file name is used in processed file.
 It means a file name will be a part of URI.
 
-All of file in this directory will be the target of processing.
+All of file in `library` directory will be the target of processing.
 Subdirectory of this directory and its children are excluded.
-If you want to ignore file(s) in this directory from processing, start the filename with string sandwiched by `#`.
-(e.g. `#DRAFT# ignore me` will be ignore. `#include not ignored` and `Any string #123 and #345` will not.)
+
+Other files (e.g. style sheets, images and so on) should be in `asset` directory of this directory.
+All files in this directory will be copied to the root of deploy point as it is.
 
 `config.yaml` and `template.html` must be in this directory.
 They are the system file.
@@ -58,21 +58,30 @@ Before running Rutulys, you have to `cd` to your source path.
 ### Directory structure
 
 ```
-@outputpath
+@deploypath
   \_ index.html
+  \_ .htaccess
   \_ style.css
-  \_ (Cache file)
   \_ ...
+  \_ image
+      \_ ...
+  \_ archive
+       \_ (Cache file)
+       \_ ...
 
 @sourcepath
   \_ config.yaml
   \_ template.html
-  \_ (Source file)
-  \_ ...
+  \_ asset
+       \_ .htaccess
+       \_ styles.css
+       \_ ...
+       \_ image
+            \_ ...
+  \_ library
+       \_ (Source file)
+       \_ ...
 ```
-
-`@outputpath` indicates the same location as `@baseuri`.
-
 
 ### Pre-defined files
 
