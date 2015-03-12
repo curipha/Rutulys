@@ -138,9 +138,6 @@ HELP
     err << "Parent directory of deploy point (#{@deploypath.inspect}) does not exist."     unless Dir.exist?(File.dirname(@deploypath))
     err << "Parent directory of deploy point (#{@deploypath.inspect}) should be writable." unless File.writable?(File.dirname(@deploypath))
 
-    err << "Style sheet file (#{stylepath.inspect}) does not exist."        unless File.exist?(stylepath)
-    err << "Style sheet file (#{stylepath.inspect}) should be readable."    unless File.readable?(stylepath)
-
     err.each {|m| err(m) } unless err.empty?
 
     abort 'Misconfiguration!' unless err.empty?
