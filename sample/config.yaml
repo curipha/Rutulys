@@ -11,9 +11,6 @@ outputpath: './www'
 # WWW base path
 baseuri: 'http://www.example.com/path/to/base'
 
-# Backup directly to store older cache file
-backuppath: './www/.backup'
-
 
 # Settings
 #---------------------------------------
