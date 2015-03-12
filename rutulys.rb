@@ -43,7 +43,6 @@ HELP
   end
   #}}}
   # build       : Build mode {{{
-  #  - create ALL caches for ALL sources
   def build
     initiate
     autognosis
@@ -133,8 +132,6 @@ HELP
     @outputpath = config['outputpath']  # Cache output directory
 
     # Settings
-    @ignore_ext = config['ignore_ext']  # Extension not to interpret as a part of the title
-    @cache_ext  = config['cache_ext']   # Extension to add the output file
     @timeformat = config['timeformat']  # Used for strftime in generating HTML
     @generator  = config['generator']   # Suffix of generator
 
@@ -168,7 +165,7 @@ HELP
 
       file = f.encode(Encoding::UTF_8)
       path = File.absolute_path(file, File.dirname(@sourcepath))
-      base = File.basename(path, @ignore_ext).strip
+      base = File.basename(path, '.*').strip
 
       if base =~ IGNORED_PATTERN
         msg "Found source file which treated as ignored. (#{file})"
@@ -284,7 +281,7 @@ HELP
 
   # cachepath   : Get path to a cache file {{{
   def cachepath(cache)
-    return "#{@outputpath}/#{cache}#{@cache_ext}"
+    return "#{@outputpath}/#{cache}.html"
   end
   #}}}
   # configpath  : Get path to the configuration file {{{
