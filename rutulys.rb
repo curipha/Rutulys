@@ -15,7 +15,7 @@ class Rutulys
   # Preferences {{{
   VERSION = '0.0.1'
 
-  MODE = :release   # Mode ( :debug or :release )
+  MODE = :release # Mode ( :debug or :release )
   MAX_THREAD = 4  # Max threads to create the cache
   #}}}
 
@@ -145,9 +145,9 @@ HELP
       next unless File.file?(f)
       next unless File.readable?(f)
 
-      file = f.encode(Encoding::UTF_8)
-      path = File.absolute_path(file, File.dirname(@sourcepath))
-      base = File.basename(path, '.*').strip
+      file  = f.encode(Encoding::UTF_8)
+      path  = File.absolute_path(file, File.dirname(@sourcepath))
+      base  = File.basename(path, '.*').strip
       mtime = File.mtime(path)
       cache = CGI.escape(base)
 
