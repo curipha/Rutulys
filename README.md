@@ -55,19 +55,6 @@ They are the system file.
 Your current directory becomes source path.
 Before running Rutulys, you have to `cd` to your source path.
 
-#### Backup path
-As known as `@backuppath`.
-
-Just an archive directory.
-This directory MUST be writable by Rutulys.
-That's all.
-
-Rutulys will create one directory for each source (original) text file.
-Backup files will be created in the directory.
-
-Backup feature cannot be disabled.
-I'm **sure** that the day you use this backup will come.
-
 ### Directory structure
 
 ```
@@ -82,12 +69,6 @@ I'm **sure** that the day you use this backup will come.
   \_ template.html
   \_ (Source file)
   \_ ...
-
-@backuppath
-    \_ (URL encoded cache title
-        \_ (URL encoded cache title with suffix to specify date and time)
-        \_ ...
-    \_ ...
 ```
 
 `@outputpath` indicates the same location as `@baseuri`.

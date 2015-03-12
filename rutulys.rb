@@ -37,8 +37,6 @@ class Rutulys
 
 
     # Internal settings
-    @bak_suffix = ".#{@now.strftime('%Y%m%d_%H%M%S_%08N')}"
-
     @ignore_out = [File.basename(__FILE__), 'index.html', 'style.css']       # Ignore files in @outputpath
     @ignore_src = [File.basename(__FILE__), 'config.yaml', 'template.html']  # Ignore files in @sourcepath
 
@@ -135,7 +133,6 @@ HELP
 
     # Paths
     @outputpath = config['outputpath']  # Cache output directory
-    @backuppath = config['backuppath']  # Backup directly to store older cache file
 
     # Settings
     @ignore_ext = config['ignore_ext']  # Extension not to interpret as a part of the title
@@ -154,8 +151,6 @@ HELP
 
     err << "Output directory (#{@outputpath.inspect}) does not exist."     unless Dir.exist?(@outputpath)
     err << "Output directory (#{@outputpath.inspect}) should be writable." unless File.writable?(@outputpath)
-    err << "Backup directory (#{@backuppath.inspect}) does not exist."     unless Dir.exist?(@backuppath)
-    err << "Backup directory (#{@backuppath.inspect}) should be writable." unless File.writable?(@backuppath)
 
     err << "Style sheet file (#{stylepath.inspect}) does not exist."        unless File.exist?(stylepath)
     err << "Style sheet file (#{stylepath.inspect}) should be readable."    unless File.readable?(stylepath)
@@ -214,7 +209,7 @@ HELP
   end
   #}}}
 
-  # generator   : Create cache files with parallel (wrap method of create_cache/backup_file) {{{
+  # generator   : Create cache files with parallel (wrap method of create_cache) {{{
   def generator(list)
     abort 'Navigation index has no entry.' if @navigation.empty?
 
@@ -227,7 +222,6 @@ HELP
 
       threads << Thread.new {
         while wu = queue.pop
-          backup_file(wu[:cpath], backuppath(wu[:cache]))
           create_cache(wu)
         end
       }
@@ -252,7 +246,6 @@ HELP
     remove = in_cache - @index.map {|i| File.basename(i[:cpath]) } - @ignore_out
     remove.each {|c|
       msg "Clean up cache #{c}"
-      backup_file(cachepath(c), backuppath(c))
       @@FileUtils.rm_f(cachepath(c))
     }
   end
@@ -267,14 +260,6 @@ HELP
     File.utime(entry[:mtime], entry[:mtime], entry[:cpath]) if MODE == :release
 
     msg "Created a cache file for #{entry[:path]}"
-  end
-  #}}}
-  # backup_file : Create backup file {{{
-  def backup_file(src, dst)
-    return unless File.exist?(src)
-
-    mkwdir(File.dirname(dst))
-    @@FileUtils.copy_file(src, dst, true, true)
   end
   #}}}
 
@@ -302,11 +287,6 @@ HELP
   # cachepath   : Get path to a cache file {{{
   def cachepath(cache)
     return "#{@outputpath}/#{cache}#{@cache_ext}"
-  end
-  #}}}
-  # backuppath  : Get path to a cache backup file {{{
-  def backuppath(cache)
-    return "#{@backuppath}/#{cache}/#{cache}#{@bak_suffix}"
   end
   #}}}
   # configpath  : Get path to the configuration file {{{
