@@ -113,17 +113,9 @@ It will be replaced by the string of the application fingerprint.
 
 ##### `%{baseuri}`
 It will be replaced by the string you specify at `config.yaml`.
-This is very important to find `style.css` by a browser.
 
 ```HTML
 <base href="%{baseuri}" />
-```
-
-##### `%{stylesheet}`
-It will be replaced by the path to `style.css`.
-
-```HTML
-<link rel="stylesheet" type="text/css" href="%{stylesheet}" />
 ```
 
 ##### `%{canonical}`
@@ -156,9 +148,6 @@ It will be replaced by the modified time string of a source file and main conten
   <div class="main">%{content}</div>
 </div>
 ```
-
-#### style.css
-Used for style sheet.
 
 #### index.html
 This file is not a pre-defined file but is noticeable.
