@@ -209,8 +209,7 @@ HELP
     # Clear the deploy directory
     if File.exist?(@deploypath)
       @@FileUtils.rm_rf(@deploypath)
-      Dir.mkdir(@deploypath)
-      FileUtils.chmod('u+rwx', @deploypath)
+      mkwdir(@deploypath)
     end
 
     # Generate caches
