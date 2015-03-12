@@ -17,8 +17,6 @@ class Rutulys
 
   MODE = :release   # Mode ( :debug or :release )
   MAX_THREAD = 4  # Max threads to create the cache
-
-  IGNORED_PATTERN = /^#[0-9a-zA-Z]+#/u  # File name pattern of source to be ignored
   #}}}
 
   # initialize  : Constructor {{{
@@ -106,8 +104,6 @@ HELP
     err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be an Integer."       unless MAX_THREAD.is_a?(Integer)
     err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be between 1 and 20." unless MAX_THREAD.between?(1, 20)
 
-    err << "IGNORED_PATTERN (#{IGNORED_PATTERN.inspect}) should be a Regexp." unless IGNORED_PATTERN.is_a?(Regexp)
-
     err << "Configuration file (#{configpath.inspect}) does not exist."     unless File.exist?(configpath)
     err << "Configuration file (#{configpath.inspect}) should be readable." unless File.readable?(configpath)
     err << "Template file (#{templatepath.inspect}) does not exist."        unless File.exist?(templatepath)
@@ -164,12 +160,6 @@ HELP
       file = f.encode(Encoding::UTF_8)
       path = File.absolute_path(file, File.dirname(@sourcepath))
       base = File.basename(path, '.*').strip
-
-      if base =~ IGNORED_PATTERN
-        msg "Found source file which treated as ignored. (#{file})"
-        next
-      end
-
       mtime = File.mtime(path)
       cache = CGI.escape(base)
 
