@@ -44,8 +44,7 @@ end
 mr = MyRutulys.new
 
 case ARGV[0]
-when 'add'     then mr.add
-when 'rebuild' then mr.rebuild
-else                mr.help
+when 'build' then mr.build
+else              mr.help
 end
 
