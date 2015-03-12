@@ -103,11 +103,8 @@ HELP
     err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be an Integer."       unless MAX_THREAD.is_a?(Integer)
     err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be between 1 and 20." unless MAX_THREAD.between?(1, 20)
 
-    err << "Configuration file (#{configpath.inspect}) does not exist."     unless File.exist?(configpath)
-    err << "Configuration file (#{configpath.inspect}) should be readable." unless File.readable?(configpath)
-    err << "Template file (#{templatepath.inspect}) does not exist."        unless File.exist?(templatepath)
-    err << "Template file (#{templatepath.inspect}) should be readable."    unless File.readable?(templatepath)
-
+    err << "Configuration file (#{configpath.inspect}) does not exist or is not readable." unless File.readable?(configpath)
+    err << "Template file (#{templatepath.inspect}) does not exist or is not readable."    unless File.readable?(templatepath)
 
     msg.each {|m| msg(m) } unless msg.empty?
     err.each {|m| err(m) } unless err.empty?
@@ -135,8 +132,7 @@ HELP
     # Validation
     err = []
 
-    err << "Parent directory of deploy point (#{@deploypath.inspect}) does not exist."     unless Dir.exist?(File.dirname(@deploypath))
-    err << "Parent directory of deploy point (#{@deploypath.inspect}) should be writable." unless File.writable?(File.dirname(@deploypath))
+    err << "Parent directory of deploying point (#{@deploypath.inspect}) does not exist or is not writable." unless File.writable?(File.dirname(@deploypath))
 
     err.each {|m| err(m) } unless err.empty?
 
