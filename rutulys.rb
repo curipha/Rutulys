@@ -76,7 +76,7 @@ HELP
     @navigation = {} # Internal index for building navigation
 
     # HTML build cache
-    @html_template, @html_author, @html_generator, @html_base = nil, nil, nil, nil
+    @html_template = nil
 
     # Internal settings
     @sourcepath = Dir.pwd # Source directory
@@ -125,7 +125,6 @@ HELP
 
     # Site customize
     @title    = config['title']
-    @author   = config['author']
     @baseuri  = config['baseuri']  # Must be same location as @deploypath
 
 
@@ -236,8 +235,6 @@ HELP
   def build_page(entry, content)
     return sprintf(@html_template ||= File.read(templatepath, mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1'),
                     title:      htmlstr("#{entry[:name]}"),
-                    generator:  @html_generator ||= htmlstr("Rutulys/#{VERSION} (UTF-8) #{@generator}".strip),
-                    baseuri:    @html_base      ||= htmlstr(@baseuri),
                     canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
                     modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
                     next:       build_nav(@navigation[entry[:path]][:next]),

@@ -104,20 +104,6 @@ It will be replaced by the file name of source file without specified extension 
 <title>%{title} | Your Site Name</title>
 ```
 
-##### `%{generator}`
-It will be replaced by the string of the application fingerprint.
-
-```HTML
-<meta name="generator" content="%{generator}" />
-```
-
-##### `%{baseuri}`
-It will be replaced by the string you specify at `config.yaml`.
-
-```HTML
-<base href="%{baseuri}" />
-```
-
 ##### `%{canonical}`
 It will be replaced by the canonical URI to this document.
 This string is prepared for search engine bot.
