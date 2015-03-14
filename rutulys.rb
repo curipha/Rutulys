@@ -27,17 +27,17 @@ module Rutulys
 
   # Article class {{{
   class Article
-    attr_reader :path, :name, :mtime, :cache, :yaml
+    attr_reader :path, :title, :mtime, :cache, :yaml
     attr_accessor :next, :prev
 
     def initialize(path)
       @path   = path                            # Full path of file (e.g. /home/jane/file.ext )
-      @name   = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
+      @title  = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
       @mtime  = path.mtime                      # Modified time of file (Time object)
 
       load_yamlheader
 
-      @cache  = CGI.escape(@name)              # URI encoded name
+      @cache  = CGI.escape(@title)              # URI encoded title
 
       @next, @prev = nil, nil
     end
@@ -45,7 +45,7 @@ module Rutulys
     def <=>(obj)
       c = @mtime <=> obj.mtime
       return c unless c == 0
-      return @name <=> obj.name
+      return @title <=> obj.title
     end
 
     def load_yamlheader
@@ -57,7 +57,7 @@ module Rutulys
         unless front.nil?
           @yaml = true
 
-          @name = front['name'].strip unless front['name'].nil?
+          @title = front['title'].strip unless front['title'].nil?
         end
       end
     end
@@ -128,7 +128,7 @@ module Rutulys
     #}}}
     # loadconfig  : Load configuration file {{{
     def loadconfig
-      config = YAML.load(configpath.read(mode: 'rb:utf-8'))
+      config = YAML.load_file(configpath, safe: true)
 
       # Paths
       @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
@@ -216,11 +216,11 @@ module Rutulys
 
       fputs(cachepath(entry.cache),
             sprintf(@html_template, {
-              title:     htmlstr(entry.name),
+              title:     htmlstr(entry.title),
               canonical: htmlstr(@baseuri + cachelink(entry.cache)),
               modified:  htmlstr(entry.mtime.strftime(@timeformat)),
-              next:      entry.next.nil? ? '' : "<div id=\"next\">#{build_link(cachelink(entry.next.cache), entry.next.name)}</div>",
-              prev:      entry.prev.nil? ? '' : "<div id=\"prev\">#{build_link(cachelink(entry.prev.cache), entry.prev.name)}</div>",
+              next:      entry.next.nil? ? '' : "<div id=\"next\">#{build_link(cachelink(entry.next.cache), entry.next.title)}</div>",
+              prev:      entry.prev.nil? ? '' : "<div id=\"prev\">#{build_link(cachelink(entry.prev.cache), entry.prev.title)}</div>",
               content:   content
             })
            )
