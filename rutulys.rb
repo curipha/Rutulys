@@ -72,8 +72,8 @@ HELP
 
     @threads = MAX_THREAD
 
-    @index = []      # Internal index for source file
-    @navigation = {} # Internal index for building navigation
+    @index = [] # Internal index for source file
+    @nav = {}   # Internal index for building navigation
 
     # HTML build cache
     @html_template = nil
@@ -176,13 +176,13 @@ HELP
     }
     nav[list.last[:path]] = { next: n, prev: nil }
 
-    @navigation = nav
+    @nav = nav
   end
   #}}}
 
   # generator   : Create cache files with parallel (wrap method of create_cache) {{{
   def generator(list)
-    abort 'Navigation index has no entry.' if @navigation.empty?
+    abort 'Navigation index has no entry.' if @nav.empty?
 
     # Clear the deploy directory
     if File.exist?(@deploypath)
@@ -239,8 +239,8 @@ HELP
                     title:      htmlstr("#{entry[:name]}"),
                     canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
                     modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
-                    next:       @navigation[entry[:path]][:next].nil? ? '' : "<div id=\"next\">#{build_link(@navigation[entry[:path]][:next][:cache], @navigation[entry[:path]][:next][:name])}</div>",
-                    prev:       @navigation[entry[:path]][:prev].nil? ? '' : "<div id=\"prev\">#{build_link(@navigation[entry[:path]][:prev][:cache], @navigation[entry[:path]][:prev][:name])}</div>",
+                    next:       @nav[entry[:path]][:next].nil? ? '' : "<div id=\"next\">#{build_link(@nav[entry[:path]][:next][:cache], @nav[entry[:path]][:next][:name])}</div>",
+                    prev:       @nav[entry[:path]][:prev].nil? ? '' : "<div id=\"prev\">#{build_link(@nav[entry[:path]][:prev][:cache], @nav[entry[:path]][:prev][:name])}</div>",
                     content:    content
                   )
   end
