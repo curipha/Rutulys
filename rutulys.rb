@@ -8,6 +8,7 @@
 require 'cgi/util'
 require 'fileutils'
 require 'thread'
+require 'pathname'
 require 'yaml'
 
 require 'rubygems'
@@ -31,8 +32,10 @@ class Rutulys
   # initialize  : Constructor {{{
   def initialize
     case ARGV[0]
-    when 'build' then build
-    else              help
+    when 'build' then
+      build
+    else
+      help
     end
   end
   # }}}
@@ -82,7 +85,7 @@ HELP
     @html_template = nil
 
     # Internal settings
-    @sourcepath = Dir.pwd # Source directory
+    @sourcepath = Pathname.pwd
 
     # Prepare markdown renderer
     @render = Redcarpet::Markdown.new(MyRedcarpet, {
@@ -97,11 +100,8 @@ HELP
     # Prepare mode-based environment
     case MODE
     when :release
-      @@FileUtils = FileUtils
-      #@@FileUtils = FileUtils::Verbose
     when :debug
       @threads = 1  # Force single thread
-      @@FileUtils = FileUtils::DryRun
     end
   end
   #}}}
@@ -116,8 +116,8 @@ HELP
     err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be an Integer."       unless MAX_THREAD.is_a?(Integer)
     err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be between 1 and 20." unless MAX_THREAD.between?(1, 20)
 
-    err << "Configuration file (#{configpath.inspect}) does not exist or is not readable." unless File.readable?(configpath)
-    err << "Template file (#{templatepath.inspect}) does not exist or is not readable."    unless File.readable?(templatepath)
+    err << "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
+    err << "Template file (#{templatepath}) does not exist or is not readable."    unless templatepath.readable?
 
     msg.each {|m| msg(m) } unless msg.empty?
     err.each {|m| err(m) } unless err.empty?
@@ -127,10 +127,10 @@ HELP
   #}}}
   # loadconfig  : Load configuration file {{{
   def loadconfig
-    config = YAML.load(File.read(configpath, mode: 'rb:utf-8'))
+    config = YAML.load(configpath.read(mode: 'rb:utf-8'))
 
     # Paths
-    @deploypath = config['deploypath']  # Deploy directory
+    @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
 
     # Settings
     @timeformat = config['timeformat']  # Used for strftime in generating HTML
@@ -143,7 +143,7 @@ HELP
     # Validation
     err = []
 
-    err << "Parent directory of deploying point (#{@deploypath.inspect}) does not exist or is not writable." unless File.writable?(File.dirname(@deploypath))
+    err << "Parent directory of deploying point (#{@deploypath}) does not exist or is not writable." unless @deploypath.dirname.writable?
 
     err.each {|m| err(m) } unless err.empty?
 
@@ -154,14 +154,12 @@ HELP
   # indexer     : Get an index for source file(s) {{{
   def indexer
     list = []
-    Dir.glob("#{@sourcepath}/library/*", File::FNM_DOTMATCH) {|f|
-      next unless File.file?(f)
-      next unless File.readable?(f)
+    librarypath.each_child {|path|
+      next unless path.file?
+      next unless path.readable?
 
-      file  = f.encode(Encoding::UTF_8)
-      path  = File.absolute_path(file, File.dirname(@sourcepath))
-      base  = File.basename(path, '.*').strip
-      mtime = File.mtime(path)
+      base  = path.basename('.*').to_s.strip
+      mtime = path.mtime
       cache = CGI.escape(base)
 
       list << [@now - mtime, base, { # sort key (1. mtime desc, 2. base asc)
@@ -198,13 +196,13 @@ HELP
     abort 'Navigation index has no entry.' if @nav.empty?
 
     # Clear the deploy directory
-    if File.exist?(@deploypath)
-      @@FileUtils.rm_rf(@deploypath)
-      mkwdir(@deploypath)
+    if @deploypath.exist?
+      @deploypath.rmtree
+      @deploypath.mkdir
     end
 
     # Prepare template cache
-    @html_template = File.read(templatepath, mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
+    @html_template = templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
 
     # Generate caches
     queue = Queue.new
@@ -224,20 +222,20 @@ HELP
     threads.each {|t| t.join }
 
     # Create symbolic link to newest cache
-    @@FileUtils.ln_s(File.basename(@index.first[:cpath]), "#{@deploypath}/index.html")
+    (@deploypath + 'index.html').make_symlink(@index.first[:cpath].relative_path_from(@deploypath))
   end
   #}}}
   # setasset    : Copy asset files to deploying point {{{
   def setasset()
-    return unless File.directory?("#{@sourcepath}/asset")
+    return unless assetpath.directory?
 
-    @@FileUtils.cp_r(Dir.glob(["#{@sourcepath}/asset/*", "#{@sourcepath}/asset/.[^.]*"]), "#{@deploypath}")
+    FileUtils.cp_r(assetpath.children, @deploypath)
   end
   #}}}
 
   # create_cache: Create cache file {{{
   def create_cache(entry)
-    content = parser(File.read(entry[:path], mode: 'rb:utf-8')).strip
+    content = parser(entry[:path].read(mode: 'rb:utf-8')).strip
     err "Empty cache file will be created for #{entry[:path]}" if content.empty?
 
     fputs(entry[:cpath], build_page(entry, content))
@@ -272,17 +270,27 @@ HELP
 
   # cachepath   : Get path to a cache file {{{
   def cachepath(cache)
-    return "#{@deploypath}/archive/#{cache}.html"
+    return @deploypath + "archive/#{cache}.html"
   end
   #}}}
   # configpath  : Get path to the configuration file {{{
   def configpath
-    return "#{@sourcepath}/config.yaml"
+    return @sourcepath + 'config.yaml'
   end
   #}}}
   # templatepath: Get path to the template file {{{
   def templatepath
-    return "#{@sourcepath}/template.html"
+    return @sourcepath + 'template.html'
+  end
+  #}}}
+  # librarypath : Get path to the library directory {{{
+  def librarypath
+    return @sourcepath + 'library'
+  end
+  #}}}
+  # assetpath   : Get path to the asset directory {{{
+  def assetpath
+    return @sourcepath + 'asset'
   end
   #}}}
 
@@ -294,29 +302,16 @@ HELP
 
   # fputs       : Write string to file {{{
   def fputs(path, str)
-    mkwdir(File.dirname(path))
-    @@FileUtils.touch(path)       unless File.exist?(path)
-    @@FileUtils.chmod(0644, path) unless File.writable?(path)
-
-    if MODE == :debug
-      puts "File.open('#{path}')"
-    else
-      # Never use "w" because it truncates the file *BEFORE* lock
-      File.open(path, 'r+b:utf-8') {|fp|
-        fp.flock(File::LOCK_EX)
-        fp.rewind
-        fp.write(str)
-        fp.flush
-        fp.truncate(fp.pos)
-      }
-    end
-
-    @@FileUtils.chmod(0444, path)
-  end
-  #}}}
-  # mkwdir      : Create writable directory {{{
-  def mkwdir(path)
-    @@FileUtils.mkdir_p(path, { mode: 0755 }) unless Dir.exist?(path)
+    path.dirname.mkpath unless path.dirname.exist?
+    path.chmod(0644) if path.exist?
+    path.open('w+b:utf-8') {|fp|
+      fp.flock(File::LOCK_EX)
+      fp.rewind
+      fp.write(str)
+      fp.flush
+      fp.truncate(fp.pos)
+    }
+    path.chmod(0444)
   end
   #}}}
 
