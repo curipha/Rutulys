@@ -10,6 +10,15 @@ require 'fileutils'
 require 'thread'
 require 'yaml'
 
+require 'rubygems'
+require 'redcarpet'
+require 'rouge'
+require 'rouge/plugins/redcarpet'
+
+class MyRedcarpet < Redcarpet::Render::XHTML
+  include Rouge::Plugins::Redcarpet
+end
+
 class Rutulys
 
   # Preferences {{{
@@ -58,12 +67,6 @@ HELP
 
   private
 
-  # parser      : Generate a parsed string (override me) {{{
-  def parser(str)
-    return str
-  end
-  #}}}
-
   # initiate    : Initiate myself {{{
   def initiate
     # Internal variables
@@ -80,6 +83,16 @@ HELP
 
     # Internal settings
     @sourcepath = Dir.pwd # Source directory
+
+    # Prepare markdown renderer
+    @render = Redcarpet::Markdown.new(MyRedcarpet, {
+      no_intra_emphasis: true,
+      tables: true,
+      fenced_code_blocks: true,
+      disable_indented_code_blocks: true,
+      space_after_headers: true,
+      superscript: true
+    })
 
     # Prepare mode-based environment
     case MODE
@@ -230,6 +243,12 @@ HELP
     fputs(entry[:cpath], build_page(entry, content))
 
     msg "Created a cache file for #{entry[:path]}"
+  end
+  #}}}
+
+  # parser      : Generate a parsed string {{{
+  def parser(str)
+    return @render.render(str)
   end
   #}}}
 

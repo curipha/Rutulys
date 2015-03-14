@@ -1,13 +1,9 @@
 Rutulys
 =======
 Rutulys transforms plain text into static websites.
-It is designed as a content management system with least functionality.
+It is designed as a content management system with minimum functionality.
 
-For example, this program does NOT contain plain text parser (e.g. Markdown parser).
-
-It just outputs a file from a text file with some processing.
-You can define 'some processing' as you want.
-(Of course, you can define it as converting from Markdown to HTML.)
+It just outputs a HTML file from a markdown text using [Redcarpet](https://github.com/vmg/redcarpet) with [Rouge](https://github.com/jneen/rouge).
 
 
 How to use
@@ -144,8 +140,6 @@ If `index.html` is already exists, it will be replaced.
 
 Extend Rutulys
 --------------
-Just inherit `Rutulys` class and extend it.
-
 `parser` method should be overridden to implement text syntax parser.
 
 
