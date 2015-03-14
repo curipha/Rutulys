@@ -115,11 +115,8 @@ module Rutulys
       @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
 
       # Settings
+      @baseuri    = config['baseuri']  # Must be same location as @deploypath
       @timeformat = config['timeformat']  # Used for strftime in generating HTML
-
-      # Site customize
-      @title    = config['title']
-      @baseuri  = config['baseuri']  # Must be same location as @deploypath
 
 
       # Validation

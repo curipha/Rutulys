@@ -8,16 +8,13 @@
 # Deploy directory (its parent directory must be writable)
 deploypath: './www'
 
-# WWW base path
-baseuri: 'http://www.example.com/path/to/base'
-
 
 # Settings
 #---------------------------------------
 
+# WWW base path
+baseuri: 'http://www.example.com/path/to/base'
+
 # Used for strftime in generating HTML
 timeformat: '%b %-d, %Y %H:%M:%S %Z'
-
-# Suffix of generator
-generator: ''
 
