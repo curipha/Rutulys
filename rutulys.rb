@@ -7,8 +7,9 @@
 
 require 'cgi/util'
 require 'fileutils'
-require 'thread'
+require 'optparse'
 require 'pathname'
+require 'thread'
 require 'yaml'
 
 require 'rubygems'
@@ -22,61 +23,15 @@ end
 
 class Rutulys
 
-  # Preferences {{{
-  VERSION = '0.0.1'
-
-  MODE = :release # Mode ( :debug or :release )
-  MAX_THREAD = 4  # Max threads to create the cache
+  # Accessors {{{
+  attr_accessor :verbose, :threads
   #}}}
 
   # initialize  : Constructor {{{
   def initialize
-    case ARGV[0]
-    when 'build' then
-      build
-    else
-      help
-    end
-  end
-  # }}}
-
-  # help        : Display help message {{{
-  def help
-    abort <<HELP
-Rutulys #{VERSION}
-
-% ./#{File.basename(__FILE__)} [option]
-
-\033[1mOption\033[0m
-build : Create caches for ALL entries
-HELP
-  end
-  #}}}
-  # build       : Build mode {{{
-  def build
-    initiate
-    autognosis
-    loadconfig
-
-    indexer
-    navindexer
-
-    generator(@index)
-    setasset
-
-    msgb 'I did everything I could :)'
-  end
-  #}}}
-
-  private
-
-  # initiate    : Initiate myself {{{
-  def initiate
     # Internal variables
     @now = Time.now
     @mutex = Mutex.new  # Giant lock ;p
-
-    @threads = MAX_THREAD
 
     @index = [] # Internal index for source file
     @nav = {}   # Internal index for building navigation
@@ -97,29 +52,36 @@ HELP
       superscript: true
     })
 
-    # Prepare mode-based environment
-    case MODE
-    when :release
-    when :debug
-      @threads = 1  # Force single thread
-    end
+    # Configurable variables
+    @verbose = false
+    @threads = 4
+  end
+  # }}}
+
+  # build       : Build mode {{{
+  def build
+    autognosis
+    loadconfig
+
+    indexer
+    navindexer
+
+    generator(@index)
+    setasset
+
+    msgb 'I did everything I could :)'
   end
   #}}}
+
+  private
+
   # autognosis  : Check for primitive preferences {{{
   def autognosis
-    msg, err = [], []
-
-    msg << 'Running in debugging mode...' if MODE == :debug
-
-    err << "MODE (#{MODE.inspect}) is unknown." if [:debug, :release].index(MODE).nil?
-
-    err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be an Integer."       unless MAX_THREAD.is_a?(Integer)
-    err << "MAX_THREAD (#{MAX_THREAD.inspect}) should be between 1 and 20." unless MAX_THREAD.between?(1, 20)
+    err = []
 
     err << "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
     err << "Template file (#{templatepath}) does not exist or is not readable."    unless templatepath.readable?
 
-    msg.each {|m| msg(m) } unless msg.empty?
     err.each {|m| err(m) } unless err.empty?
 
     abort 'Misconfiguration!' unless err.empty?
@@ -329,7 +291,7 @@ HELP
   #}}}
   # msg         : Display message {{{
   def msg(str)
-    log(str)
+    log(str) if @verbose
   end
   #}}}
   # msgb        : Display bold message {{{
@@ -340,5 +302,35 @@ HELP
 
 end
 
-Rutulys.new
+r = Rutulys.new
+
+mode = :nop
+
+OptionParser.new do |op|
+  op.version = '0.0.1'
+
+  op.on('--verbose', 'Verbose mode') {|flag|
+    r.verbose = flag
+  }
+  op.on('-t THREAD', '--thread=THREAD', "Set a number of thread to build a page (Default = #{r.threads})") {|value|
+    thread = value.to_i
+
+    abort "THREAD (#{value.inspect}) should be between 1 and 20." unless thread.between?(1, 20)
+
+    r.threads = thread
+  }
+
+  op.on('-b', '--build', 'Create caches for ALL entries') {|flag|
+    mode = :build
+  }
+
+  op.parse(ARGV)
+end
+
+case mode
+when :build
+  r.build
+else
+  abort 'You have to specify -b (or --build) option to build your page.'
+end
 
