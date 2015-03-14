@@ -10,14 +10,16 @@ require 'fileutils'
 require 'optparse'
 require 'pathname'
 require 'thread'
-require 'yaml'
 
 require 'rubygems'
 require 'redcarpet'
 require 'rouge'
 require 'rouge/plugins/redcarpet'
+require 'safe_yaml'
 
 module Rutulys
+
+  YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
 
   class Render < Redcarpet::Render::XHTML
     include Rouge::Plugins::Redcarpet
@@ -25,14 +27,17 @@ module Rutulys
 
   # Article class {{{
   class Article
-    attr_reader :path, :name, :mtime, :cache
+    attr_reader :path, :name, :mtime, :cache, :yaml
     attr_accessor :next, :prev
 
     def initialize(path)
       @path   = path                            # Full path of file (e.g. /home/jane/file.ext )
       @name   = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
       @mtime  = path.mtime                      # Modified time of file (Time object)
-      @cache  = CGI.escape(@name)               # URI encoded name
+
+      load_yamlheader
+
+      @cache  = CGI.escape(@name)              # URI encoded name
 
       @next, @prev = nil, nil
     end
@@ -41,6 +46,20 @@ module Rutulys
       c = @mtime <=> obj.mtime
       return c unless c == 0
       return @name <=> obj.name
+    end
+
+    def load_yamlheader
+      @yaml = false
+
+      if @path.read(mode: 'rb:utf-8') =~ YAML_FRONT_MATTER
+        front = YAML.load($&, safe: true)
+
+        unless front.nil?
+          @yaml = true
+
+          @name = front['name'].strip unless front['name'].nil?
+        end
+      end
     end
   end
   #}}}
@@ -192,7 +211,7 @@ module Rutulys
 
     # create_cache: Create cache file {{{
     def create_cache(entry)
-      content = parser(entry.path.read(mode: 'rb:utf-8')).strip
+      content = parser(entry.path.read(mode: 'rb:utf-8').sub(YAML_FRONT_MATTER, '')).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
       fputs(cachepath(entry.cache),
