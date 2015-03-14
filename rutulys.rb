@@ -215,7 +215,7 @@ HELP
   def setasset(list)
     return unless File.directory?("#{@sourcepath}/asset")
 
-    FileUtils.cp_r(Dir.glob(["#{@sourcepath}/asset/*", "#{@sourcepath}/asset/.[^.]*"]), "#{@deploypath}")
+    @@FileUtils.cp_r(Dir.glob(["#{@sourcepath}/asset/*", "#{@sourcepath}/asset/.[^.]*"]), "#{@deploypath}")
   end
   #}}}
 
