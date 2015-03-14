@@ -211,7 +211,10 @@ module Rutulys
 
     # create_cache: Create cache file {{{
     def create_cache(entry)
-      content = parser(entry.path.read(mode: 'rb:utf-8').sub(YAML_FRONT_MATTER, '')).strip
+      raw = entry.path.read(mode: 'rb:utf-8')
+      raw = raw.sub(YAML_FRONT_MATTER, '') if entry.yaml
+
+      content = parser(raw).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
       fputs(cachepath(entry.cache),
