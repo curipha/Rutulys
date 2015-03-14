@@ -189,7 +189,7 @@ module Rutulys
     end
     #}}}
     # setasset    : Copy asset files to deploying point {{{
-    def setasset()
+    def setasset
       return unless assetpath.directory?
 
       FileUtils.cp_r(assetpath.children, @deploypath)
@@ -300,7 +300,6 @@ module Rutulys
       log("\033[1m#{str}\033[0m")
     end
     #}}}
-
   end
 
 end
