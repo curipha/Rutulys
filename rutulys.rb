@@ -23,6 +23,28 @@ module Rutulys
     include Rouge::Plugins::Redcarpet
   end
 
+  # Article class {{{
+  class Article
+    attr_reader :path, :name, :mtime, :cache
+    attr_accessor :next, :prev
+
+    def initialize(path)
+      @path   = path                            # Full path of file (e.g. /home/jane/file.ext )
+      @name   = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
+      @mtime  = path.mtime                      # Modified time of file (Time object)
+      @cache  = CGI.escape(@name)               # URI encoded name
+
+      @next, @prev = nil, nil
+    end
+
+    def <=>(obj)
+      c = @mtime <=> obj.mtime
+      return c unless c == 0
+      return @name <=> obj.name
+    end
+  end
+  #}}}
+
   class Main
     # Accessors {{{
     attr_accessor :verbose, :threads
@@ -35,7 +57,6 @@ module Rutulys
       @mutex = Mutex.new  # Giant lock ;p
 
       @index = [] # Internal index for source file
-      @nav = {}   # Internal index for building navigation
 
       # HTML build cache
       @html_template = nil
@@ -65,8 +86,6 @@ module Rutulys
       loadconfig
 
       indexer
-      navindexer
-
       generator(@index)
       setasset
 
@@ -121,43 +140,21 @@ module Rutulys
         next unless path.file?
         next unless path.readable?
 
-        base  = path.basename('.*').to_s.strip
-        mtime = path.mtime
-        cache = CGI.escape(base)
-
-        list << [@now - mtime, base, { # sort key (1. mtime desc, 2. base asc)
-          path:  path,             # Full path of file (e.g. /home/jane/file.ext )
-          name:  base,             # Name of file      (e.g.            file     )
-          cache: cache,            # URI encoded name
-          cpath: cachepath(cache), # Path to cache file
-          mtime: mtime             # Modified time of file (Time object)
-        }]
+        list << Rutulys::Article.new(path)
       }
 
       abort 'No source file is found.' if list.empty?
 
-      @index = (list.sort.transpose)[2]
-    end
-    #}}}
-    # navindexer  : Get an navigation index {{{
-    def navindexer(list = @index)
-      nav = {}
-
-      n = nil
-      list.each_cons(2) {|c, p|
-        nav[c[:path]] = { next: n, prev: p }
-        n = c
+      list.sort.each_cons(2) {|c, n|
+        c.next = n
+        n.prev = c
       }
-      nav[list.last[:path]] = { next: n, prev: nil }
-
-      @nav = nav
+      @index = list.sort
     end
     #}}}
 
     # generator   : Create cache files with parallel (wrap method of create_cache) {{{
     def generator(list)
-      abort 'Navigation index has no entry.' if @nav.empty?
-
       # Clear the deploy directory
       if @deploypath.exist?
         @deploypath.rmtree
@@ -185,7 +182,7 @@ module Rutulys
       threads.each {|t| t.join }
 
       # Create symbolic link to newest cache
-      (@deploypath + 'index.html').make_symlink(@index.first[:cpath].relative_path_from(@deploypath))
+      (@deploypath + 'index.html').make_symlink(cachepath(@index.last.cache).relative_path_from(@deploypath))
     end
     #}}}
     # setasset    : Copy asset files to deploying point {{{
@@ -198,12 +195,21 @@ module Rutulys
 
     # create_cache: Create cache file {{{
     def create_cache(entry)
-      content = parser(entry[:path].read(mode: 'rb:utf-8')).strip
-      err "Empty cache file will be created for #{entry[:path]}" if content.empty?
+      content = parser(entry.path.read(mode: 'rb:utf-8')).strip
+      err "Empty cache file will be created for #{entry.path}" if content.empty?
 
-      fputs(entry[:cpath], build_page(entry, content))
+      fputs(cachepath(entry.cache),
+            sprintf(@html_template, {
+              title:     htmlstr(entry.name),
+              canonical: htmlstr(@baseuri + cachelink(entry.cache)),
+              modified:  htmlstr(entry.mtime.strftime(@timeformat)),
+              next:      entry.next.nil? ? '' : "<div id=\"next\">#{build_link(cachelink(entry.next.cache), entry.next.name)}</div>",
+              prev:      entry.prev.nil? ? '' : "<div id=\"prev\">#{build_link(cachelink(entry.prev.cache), entry.prev.name)}</div>",
+              content:   content
+            })
+           )
 
-      msg "Created a cache file for #{entry[:path]}"
+      msg "Created a cache file for #{entry.path}"
     end
     #}}}
 
@@ -212,22 +218,15 @@ module Rutulys
       return @render.render(str)
     end
     #}}}
-
-    # build_page  : Build a HTML of cache {{{
-    def build_page(entry, content)
-      return sprintf(@html_template, {
-        title:      htmlstr("#{entry[:name]}"),
-        canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
-        modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
-        next:       @nav[entry[:path]][:next].nil? ? '' : "<div id=\"next\">#{build_link(@nav[entry[:path]][:next][:cache], @nav[entry[:path]][:next][:name])}</div>",
-        prev:       @nav[entry[:path]][:prev].nil? ? '' : "<div id=\"prev\">#{build_link(@nav[entry[:path]][:prev][:cache], @nav[entry[:path]][:prev][:name])}</div>",
-        content:    content
-      })
-    end
-    #}}}
-    # build_nav   : Build a link {{{
+    # build_link  : Build a link {{{
     def build_link(uri, name)
       return "<a href=\"#{htmlstr(uri)}\">#{htmlstr(name)}</a>"
+    end
+    #}}}
+
+    # cachelink   : Get link to a cache {{{
+    def cachelink(cache)
+      return "/archive/#{cache}"
     end
     #}}}
 
