@@ -190,6 +190,9 @@ HELP
       mkwdir(@deploypath)
     end
 
+    # Prepare template cache
+    @html_template = File.read(templatepath, mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
+
     # Generate caches
     queue = Queue.new
     list.each {|l| queue.push(l) }
@@ -232,7 +235,7 @@ HELP
 
   # build_page  : Build a HTML of cache {{{
   def build_page(entry, content)
-    return sprintf(@html_template ||= File.read(templatepath, mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1'),
+    return sprintf(@html_template,
                     title:      htmlstr("#{entry[:name]}"),
                     canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
                     modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
