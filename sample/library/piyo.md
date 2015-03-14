@@ -1,3 +1,8 @@
+---
+title: check markdown feature
+
+---
+
 # Piyo
 
 ## This is a sample text for checking some stuff of markdown
