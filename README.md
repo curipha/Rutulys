@@ -15,7 +15,7 @@ How to use
 
 ### Command
 
-#### `build`
+#### `--build`
 Build the whole website.
 
 ### Wording
@@ -27,6 +27,8 @@ Processed files will be outputted to this directory.
 A parent directory of this path MUST be writable by Rutulys.
 
 `index.html` will be created in this directory automatically.
+
+This directory will be cleaned on build.
 
 Cache file name is converted from original one to URL-encoded string.
 As a character encoding, we use UTF-8.
@@ -110,14 +112,12 @@ This string is prepared for search engine bot.
 
 ##### `%{next}`, `%{prev}`
 It will be replaced by the navigation link.
-
 If it is the newest or oldest file, the text will be blank.
-Use `:empty` pseudo-class to hide the element.
 
 ```HTML
 <nav>
-  <div id="next">%{next}</div>
-  <div id="prev">%{prev}</div>
+  %{next}
+  %{prev}
 </nav>
 ```
 
@@ -140,7 +140,7 @@ If `index.html` is already exists, it will be replaced.
 
 Extend Rutulys
 --------------
-`parser` method should be overridden to implement text syntax parser.
+`parser` method can be overridden to implement text syntax parser.
 
 
 Related rich products
