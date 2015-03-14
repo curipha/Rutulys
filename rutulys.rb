@@ -239,15 +239,15 @@ HELP
                     title:      htmlstr("#{entry[:name]}"),
                     canonical:  htmlstr("#{@baseuri}/#{entry[:cache]}"),
                     modified:   htmlstr(entry[:mtime].strftime(@timeformat)),
-                    next:       build_nav(@navigation[entry[:path]][:next]),
-                    prev:       build_nav(@navigation[entry[:path]][:prev]),
+                    next:       @navigation[entry[:path]][:next].nil? ? '' : "<div id=\"next\">#{build_link(@navigation[entry[:path]][:next][:cache], @navigation[entry[:path]][:next][:name])}</div>",
+                    prev:       @navigation[entry[:path]][:prev].nil? ? '' : "<div id=\"prev\">#{build_link(@navigation[entry[:path]][:prev][:cache], @navigation[entry[:path]][:prev][:name])}</div>",
                     content:    content
                   )
   end
   #}}}
-  # build_nav   : Build a navigation link {{{
-  def build_nav(nav)
-    return nav.nil? ? '<!-- n/a -->' : "<a href=\"#{htmlstr(nav[:cache])}\">#{htmlstr(nav[:name])}</a>"
+  # build_nav   : Build a link {{{
+  def build_link(uri, name)
+    return "<a href=\"#{htmlstr(uri)}\">#{htmlstr(name)}</a>"
   end
   #}}}
 
