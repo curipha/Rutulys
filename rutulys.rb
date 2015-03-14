@@ -228,7 +228,7 @@ HELP
   end
   #}}}
   # setasset    : Copy asset files to deploying point {{{
-  def setasset(list)
+  def setasset()
     return unless File.directory?("#{@sourcepath}/asset")
 
     @@FileUtils.cp_r(Dir.glob(["#{@sourcepath}/asset/*", "#{@sourcepath}/asset/.[^.]*"]), "#{@deploypath}")
