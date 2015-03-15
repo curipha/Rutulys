@@ -52,6 +52,8 @@ module Rutulys
       return @title <=> obj.title
     end
 
+    private
+
     def load_yamlheader
       @yaml = false
 
