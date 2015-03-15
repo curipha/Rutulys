@@ -167,9 +167,9 @@ module Rutulys
 
       abort 'No source file is found.' if list.empty?
 
-      list.sort.each_cons(2) {|c, n|
-        c.next = n
-        n.prev = c
+      list.sort.each_cons(2) {|cur, nxt|
+        cur.next = nxt
+        nxt.prev = cur
       }
       @index = list.sort
     end
