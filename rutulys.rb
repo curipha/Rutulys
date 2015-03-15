@@ -78,7 +78,7 @@ module Rutulys
         unless front.nil?
           @yaml = true
 
-          @title = front['title'].strip unless front['title'].nil?
+          @title = front['title'].strip unless front['title'].to_s.empty?
         end
       end
     end
@@ -239,12 +239,12 @@ module Rutulys
             sprintf(@html_template, {
               title:     htmlstr(entry.title),
               canonical: htmlstr(@baseuri + entry.link),
-              modified:  htmlstr(entry.mtime.strftime(@timeformat)),
-              next:      entry.next.nil? ? '' : "<div id=\"next\">#{build_link(entry.next.link, entry.next.title)}</div>",
-              prev:      entry.prev.nil? ? '' : "<div id=\"prev\">#{build_link(entry.prev.link, entry.prev.title)}</div>",
+              modified:  entry.mtime.nil? ? '' : htmlstr(entry.mtime.strftime(@timeformat)),
+              next:      entry.next.nil?  ? '' : "<div id=\"next\">#{build_link(entry.next.link, entry.next.title)}</div>",
+              prev:      entry.prev.nil?  ? '' : "<div id=\"prev\">#{build_link(entry.prev.link, entry.prev.title)}</div>",
               content:   content
             })
-           )
+      )
 
       msg "Created a cache file for #{entry.path} (#{entry.title})"
     end
