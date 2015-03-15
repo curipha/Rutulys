@@ -289,7 +289,7 @@ module Rutulys
           "- #{build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(@categ_timeformat)})"
         }
       else
-        puts "Process skipped since entry type unknown (#{entry})"
+        err "Process skipped since entry type unknown (#{entry})"
         return
       end
       content = parser(raw).strip
