@@ -42,6 +42,10 @@ module Rutulys
       @next, @prev = nil, nil
     end
 
+    def link
+      return "/archive/#{@cache}"
+    end
+
     def <=>(obj)
       c = @mtime <=> obj.mtime
       return c unless c == 0
@@ -220,10 +224,10 @@ module Rutulys
       fputs(cachepath(entry.cache),
             sprintf(@html_template, {
               title:     htmlstr(entry.title),
-              canonical: htmlstr(@baseuri + cachelink(entry.cache)),
+              canonical: htmlstr(@baseuri + entry.link),
               modified:  htmlstr(entry.mtime.strftime(@timeformat)),
-              next:      entry.next.nil? ? '' : "<div id=\"next\">#{build_link(cachelink(entry.next.cache), entry.next.title)}</div>",
-              prev:      entry.prev.nil? ? '' : "<div id=\"prev\">#{build_link(cachelink(entry.prev.cache), entry.prev.title)}</div>",
+              next:      entry.next.nil? ? '' : "<div id=\"next\">#{build_link(entry.next.link, entry.next.title)}</div>",
+              prev:      entry.prev.nil? ? '' : "<div id=\"prev\">#{build_link(entry.prev.link, entry.prev.title)}</div>",
               content:   content
             })
            )
@@ -240,12 +244,6 @@ module Rutulys
     # build_link  : Build a link {{{
     def build_link(uri, name)
       return "<a href=\"#{htmlstr(uri)}\">#{htmlstr(name)}</a>"
-    end
-    #}}}
-
-    # cachelink   : Get link to a cache {{{
-    def cachelink(cache)
-      return "/archive/#{cache}"
     end
     #}}}
 
