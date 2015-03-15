@@ -19,8 +19,6 @@ require 'safe_yaml'
 
 module Rutulys
 
-  YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
-
   class Render < Redcarpet::Render::XHTML
     include Rouge::Plugins::Redcarpet
   end
@@ -40,6 +38,8 @@ module Rutulys
 
   # Article class {{{
   class Article < Page
+    YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
+
     attr_reader :yaml
 
     def initialize(path)
