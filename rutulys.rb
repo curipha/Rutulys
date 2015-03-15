@@ -184,7 +184,7 @@ module Rutulys
       end
 
       # Prepare template cache
-      @html_template = templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
+      @html_template ||= templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
 
       # Generate caches
       queue = Queue.new
