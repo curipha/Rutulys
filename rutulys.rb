@@ -79,8 +79,42 @@ module Rutulys
           @yaml = true
 
           @title = front['title'].strip unless front['title'].to_s.empty?
+
+          unless front['category'].nil?
+            front['category'] = front['category'].to_s.split(' ') unless front['category'].is_a?(Array)
+            @category = front['category'].uniq.inject([]) {|result, category| result << Rutulys::Category.new(category) }
+          end
         end
       end
+    end
+  end
+  #}}}
+  # Category class {{{
+  class Category < Page
+    def initialize(title)
+      super
+
+      @name  = title
+      @title = "Category:#{title}"
+      @cache = CGI.escape(@title)
+
+      @articles = []
+    end
+
+    def add(article)
+      @articles << article
+    end
+
+    def count
+      return @articles.length
+    end
+
+    def content
+      return @articles.sort.inject([]) {|result, entry| result << yield(entry) }.join("\n")
+    end
+
+    def <=>(obj)
+      return @name <=> obj.name
     end
   end
   #}}}
@@ -96,10 +130,12 @@ module Rutulys
       @now = Time.now
       @mutex = Mutex.new  # Giant lock ;p
 
-      @index = [] # Internal index for source file
+      @index    = [] # Internal index for source file
+      @category = [] # Internal index for category
 
       # HTML build cache
       @html_template = nil
+      @category_list = nil
 
       # Internal settings
       @sourcepath = Pathname.pwd
@@ -126,7 +162,7 @@ module Rutulys
       loadconfig
 
       indexer
-      generator(@index)
+      generator(@index + @category)
       setasset
 
       msgb 'I did everything I could :)'
@@ -158,6 +194,8 @@ module Rutulys
       @baseuri    = config['baseuri']  # Must be same location as @deploypath
       @timeformat = config['timeformat']  # Used for strftime in generating HTML
 
+      @categ_timeformat = config['category']['timeformat']  # Used for strftime in generating HTML
+
 
       # Validation
       err = []
@@ -187,6 +225,20 @@ module Rutulys
         previous.next = current
       }
       @index = list.sort
+
+      categories = []
+      list.each {|article|
+        article.category.each {|entry_category|
+          categobj = categories.find {|category| category.name == entry_category.name }
+          if categobj.nil?
+            categobj = Rutulys::Category.new(entry_category.name)
+            categories << categobj
+          end
+
+          categobj.add(article)
+        }
+      }
+      @category = categories.sort
     end
     #}}}
 
@@ -200,6 +252,12 @@ module Rutulys
 
       # Prepare template cache
       @html_template ||= templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
+
+      if @category_list.nil?
+        @category_list = @category.inject([]) {|result, category|
+          result << "<li>#{build_link(category.link, category.name)} <small>#{category.count}</small></li>"
+        }.join("\n")
+      end
 
       # Generate page caches
       queue = Queue.new
@@ -232,17 +290,30 @@ module Rutulys
 
     # create_cache: Create cache file {{{
     def create_cache(entry)
-      content = parser(entry.content).strip
+      case
+      when entry.is_a?(Rutulys::Article)
+        raw = entry.content
+      when entry.is_a?(Rutulys::Category)
+        raw = entry.content {|localentry|
+          "- #{build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(@categ_timeformat)})"
+        }
+      else
+        puts "Process skipped since entry type unknown (#{entry})"
+        return
+      end
+      content = parser(raw).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
       fputs(cachepath(entry.cache),
             sprintf(@html_template, {
               title:     htmlstr(entry.title),
+              category:  entry.category.sort.inject([]) {|result, cat| result << build_link(cat.link, cat.name)}.join("\n"),
               canonical: htmlstr(@baseuri + entry.link),
               modified:  entry.mtime.nil? ? '' : htmlstr(entry.mtime.strftime(@timeformat)),
               next:      entry.next.nil?  ? '' : "<div id=\"next\">#{build_link(entry.next.link, entry.next.title)}</div>",
               prev:      entry.prev.nil?  ? '' : "<div id=\"prev\">#{build_link(entry.prev.link, entry.prev.title)}</div>",
-              content:   content
+              content:   content,
+              categlist: @category_list
             })
       )
 
@@ -258,6 +329,11 @@ module Rutulys
     # cachepath   : Get path to a cache file {{{
     def cachepath(cache)
       return @deploypath + "archive/#{cache}.html"
+    end
+    #}}}
+    # categorypath: Get path to a category file {{{
+    def categorypath(category)
+      return @deploypath + "category/#{category}.html"
     end
     #}}}
     # configpath  : Get path to the configuration file {{{
