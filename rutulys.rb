@@ -55,6 +55,12 @@ module Rutulys
       @cache = CGI.escape(@title)              # URI encoded title
     end
 
+    def content
+      raw = @path.read(mode: 'rb:utf-8')
+      raw = raw.sub(YAML_FRONT_MATTER, '') if @yaml
+      return raw
+    end
+
     def <=>(obj)
       c = @mtime <=> obj.mtime
       return c unless c == 0
@@ -226,10 +232,7 @@ module Rutulys
 
     # create_cache: Create cache file {{{
     def create_cache(entry)
-      raw = entry.path.read(mode: 'rb:utf-8')
-      raw = raw.sub(YAML_FRONT_MATTER, '') if entry.yaml
-
-      content = parser(raw).strip
+      content = parser(entry.content).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
       fputs(cachepath(entry.cache),
