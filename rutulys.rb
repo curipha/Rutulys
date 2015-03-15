@@ -24,7 +24,7 @@ module Rutulys
   end
 
   class Page
-    attr_reader :path, :name, :title, :mtime, :cache, :category
+    attr_reader :path, :name, :title, :mtime, :category
     attr_accessor :next, :prev
 
     def initialize(*args)
@@ -32,7 +32,10 @@ module Rutulys
     end
 
     def link
-      return "/archive/#{@cache}"
+      return "/archive/#{cache}"
+    end
+    def cache
+      return @cache ||= CGI.escape(@title)
     end
   end
 
@@ -52,7 +55,6 @@ module Rutulys
       load_yamlheader
 
       @title = @name if @title.nil?            # Title
-      @cache = CGI.escape(@title)              # URI encoded title
     end
 
     def content
@@ -96,7 +98,6 @@ module Rutulys
 
       @name  = title
       @title = "Category:#{title}"
-      @cache = CGI.escape(@title)
 
       @articles = []
     end
