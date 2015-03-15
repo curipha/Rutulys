@@ -175,7 +175,7 @@ module Rutulys
     end
     #}}}
 
-    # generator   : Create cache files with parallel (wrap method of create_cache) {{{
+    # generator   : Create cache files in parallel {{{
     def generator(list)
       # Clear the deploy directory
       if @deploypath.exist?
