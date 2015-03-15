@@ -254,11 +254,6 @@ module Rutulys
       return @render.render(str)
     end
     #}}}
-    # build_link  : Build a link {{{
-    def build_link(uri, name)
-      return "<a href=\"#{htmlstr(uri)}\">#{htmlstr(name)}</a>"
-    end
-    #}}}
 
     # cachepath   : Get path to a cache file {{{
     def cachepath(cache)
@@ -289,6 +284,11 @@ module Rutulys
     # htmlstr     : Get HTML-escaped string {{{
     def htmlstr(str)
       return CGI.escapeHTML(str)
+    end
+    #}}}
+    # build_link  : Build a link {{{
+    def build_link(uri, name)
+      return "<a href=\"#{htmlstr(uri)}\">#{htmlstr(name)}</a>"
     end
     #}}}
 
