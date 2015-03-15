@@ -246,10 +246,9 @@ module Rutulys
             })
       )
 
-      msg "Created a cache file for #{entry.path} (#{entry.title})"
+      msg "Create a cache file for: #{entry.path.nil? ? '-' : entry.path} (#{entry.title})"
     end
     #}}}
-
     # parser      : Generate a parsed string {{{
     def parser(str)
       return @render.render(str)
