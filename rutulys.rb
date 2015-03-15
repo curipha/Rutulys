@@ -159,7 +159,6 @@ module Rutulys
 
     # build       : Build mode {{{
     def build
-      autognosis
       loadconfig
 
       indexer
@@ -172,20 +171,10 @@ module Rutulys
 
     private
 
-    # autognosis  : Check for primitive preferences {{{
-    def autognosis
-      err = []
-
-      err << "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
-      err << "Template file (#{templatepath}) does not exist or is not readable."    unless templatepath.readable?
-
-      err.each {|m| err(m) } unless err.empty?
-
-      abort 'Misconfiguration!' unless err.empty?
-    end
-    #}}}
     # loadconfig  : Load configuration file {{{
     def loadconfig
+      abort "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
+
       config = YAML.load_file(configpath, safe: true)
 
       # Paths
@@ -201,11 +190,13 @@ module Rutulys
       # Validation
       err = []
 
+      err << "Template file (#{templatepath}) does not exist or is not readable." unless templatepath.readable?
       err << "Parent directory of deploying point (#{@deploypath}) does not exist or is not writable." unless @deploypath.dirname.writable?
 
-      err.each {|m| err(m) } unless err.empty?
-
-      abort 'Misconfiguration!' unless err.empty?
+      unless err.empty?
+        err.each {|m| err(m) }
+        abort
+      end
     end
     #}}}
 
