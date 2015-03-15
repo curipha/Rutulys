@@ -331,11 +331,6 @@ module Rutulys
       return @deploypath + "archive/#{cache}.html"
     end
     #}}}
-    # categorypath: Get path to a category file {{{
-    def categorypath(category)
-      return @deploypath + "category/#{category}.html"
-    end
-    #}}}
     # configpath  : Get path to the configuration file {{{
     def configpath
       return @sourcepath + 'config.yaml'
