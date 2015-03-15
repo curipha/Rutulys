@@ -121,14 +121,26 @@ If it is the newest or oldest file, the text will be blank.
 </nav>
 ```
 
-##### `%{content}`, `%{modified}`
-It will be replaced by the modified time string of a source file and main content text.
+##### `%{content}`, `%{modified}`, `%{category}`
+`%{content}` will be replaced by a main content text.
+`%{modified}` will be replaced by the modified time string of a source file.
+`%{category}` will be replaced by the link list of categories of a source file.
 
 ```HTML
 <article>
   <div class="date">%{modified}</div>
+  <div class="tags">%{category}</div>
   <div class="main">%{content}</div>
 </article>
+```
+
+##### `%{categlist}`
+It will be replaced by the category list of this site.
+
+```HTML
+<footer>
+  <ul>%{categlist}</ul>
+</footer>
 ```
 
 #### index.html

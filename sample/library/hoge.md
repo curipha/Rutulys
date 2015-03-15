@@ -1,3 +1,7 @@
+---
+category: ["Category with space", "Multiple"]
+---
+
 # Hoge
 
 ```c

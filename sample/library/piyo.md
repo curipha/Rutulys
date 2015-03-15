@@ -1,6 +1,6 @@
 ---
 title: check markdown feature
-
+category: foo bar 日本語 <tag>
 ---
 
 # Piyo

@@ -18,3 +18,8 @@ baseuri: 'http://www.example.com/path/to/base'
 # Used for strftime in generating HTML
 timeformat: '%b %-d, %Y %H:%M:%S %Z'
 
+
+# For category page
+category:
+  # Used for strftime in generating HTML
+  timeformat: '%b %-d, %Y'
