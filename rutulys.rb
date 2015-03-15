@@ -62,7 +62,7 @@ module Rutulys
     end
 
     def <=>(obj)
-      c = @mtime <=> obj.mtime
+      c = obj.mtime <=> @mtime  # descending
       return c unless c == 0
       return @title <=> obj.title
     end
@@ -182,9 +182,9 @@ module Rutulys
 
       abort 'No source file is found.' if list.empty?
 
-      list.sort.each_cons(2) {|cur, nxt|
-        cur.next = nxt
-        nxt.prev = cur
+      list.sort.each_cons(2) {|current, previous|
+        current.prev  = previous
+        previous.next = current
       }
       @index = list.sort
     end
@@ -219,7 +219,7 @@ module Rutulys
       threads.each {|t| t.join }
 
       # Create symbolic link to newest cache
-      (@deploypath + 'index.html').make_symlink(cachepath(@index.last.cache).relative_path_from(@deploypath))
+      (@deploypath + 'index.html').make_symlink(cachepath(@index.first.cache).relative_path_from(@deploypath))
     end
     #}}}
     # setasset    : Copy asset files to deploying point {{{
