@@ -24,7 +24,7 @@ module Rutulys
   end
 
   class Page
-    attr_reader :path, :name, :title, :mtime, :category
+    attr_reader   :path, :name, :title, :mtime, :category
     attr_accessor :next, :prev
 
     def initialize(*args)
@@ -35,7 +35,7 @@ module Rutulys
       return "/archive/#{cache}"
     end
     def cache
-      return @cache ||= CGI.escape(@title)
+      return @cache ||= CGI.escape(@title)  # URI encoded title
     end
   end
 
@@ -105,7 +105,6 @@ module Rutulys
     def add(article)
       @articles << article
     end
-
     def count
       return @articles.length
     end
