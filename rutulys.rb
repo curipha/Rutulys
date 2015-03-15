@@ -25,25 +25,34 @@ module Rutulys
     include Rouge::Plugins::Redcarpet
   end
 
-  # Article class {{{
-  class Article
-    attr_reader :path, :title, :mtime, :cache, :yaml
+  class Page
+    attr_reader :path, :name, :title, :mtime, :cache, :category
     attr_accessor :next, :prev
 
-    def initialize(path)
-      @path   = path                            # Full path of file (e.g. /home/jane/file.ext )
-      @title  = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
-      @mtime  = path.mtime                      # Modified time of file (Time object)
-
-      load_yamlheader
-
-      @cache  = CGI.escape(@title)              # URI encoded title
-
-      @next, @prev = nil, nil
+    def initialize(*args)
+      @category = []
     end
 
     def link
       return "/archive/#{@cache}"
+    end
+  end
+
+  # Article class {{{
+  class Article < Page
+    attr_reader :yaml
+
+    def initialize(path)
+      super
+
+      @path  = path                            # Full path of file (e.g. /home/jane/file.ext )
+      @name  = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
+      @mtime = path.mtime                      # Modified time of file (Time object)
+
+      load_yamlheader
+
+      @title = @name if @title.nil?            # Title
+      @cache = CGI.escape(@title)              # URI encoded title
     end
 
     def <=>(obj)
@@ -186,7 +195,7 @@ module Rutulys
       # Prepare template cache
       @html_template ||= templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
 
-      # Generate caches
+      # Generate page caches
       queue = Queue.new
       list.each {|l| queue.push(l) }
 
@@ -234,7 +243,7 @@ module Rutulys
             })
            )
 
-      msg "Created a cache file for #{entry.path}"
+      msg "Created a cache file for #{entry.path} (#{entry.title})"
     end
     #}}}
 
