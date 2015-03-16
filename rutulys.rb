@@ -377,7 +377,7 @@ module Rutulys
     #}}}
     # build_link  : Build a link {{{
     def build_link(uri, name)
-      return "<a href=\"#{htmlstr(uri)}\">#{htmlstr(name)}</a>"
+      return "<a href=\"#{htmlescape(uri)}\">#{htmlescape(name)}</a>"
     end
     #}}}
 
