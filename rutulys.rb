@@ -389,13 +389,7 @@ module Rutulys
     def write(path, str)
       path.dirname.mkpath unless path.dirname.exist?
       path.chmod(0644) if path.exist?
-      path.open('w+b:utf-8') {|fp|
-        fp.flock(File::LOCK_EX)
-        fp.rewind
-        fp.write(str)
-        fp.flush
-        fp.truncate(fp.pos)
-      }
+      path.write(str, nil, mode: 'w+b:utf-8')
       path.chmod(0444)
     end
     #}}}

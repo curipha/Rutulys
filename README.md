@@ -5,6 +5,7 @@ It is designed as a content management system with minimum functionality.
 
 It just outputs a HTML file from a markdown text using [Redcarpet](https://github.com/vmg/redcarpet) with [Rouge](https://github.com/jneen/rouge).
 
+Rutulys requires Ruby 2.1.0 and over.
 
 How to use
 ----------
