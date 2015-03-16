@@ -5,7 +5,6 @@
 # |_|_\\_,_|\__|\_,_|_|\_, /__/
 #                      |__/
 
-require 'cgi/util'
 require 'fileutils'
 require 'optparse'
 require 'pathname'
@@ -35,7 +34,7 @@ module Rutulys
       return "/archive/#{cache}"
     end
     def cache
-      return @cache ||= CGI.escape(@title)  # URI encoded title
+      return @cache ||= Util::urlencode(@title)  # URI encoded title
     end
   end
 
@@ -370,9 +369,14 @@ module Rutulys
   module Util
     extend self
 
+    # urlencode   : Get URL-encoded string {{{
+    def urlencode(str)
+      return str.to_s.b.gsub(/[^0-9A-Za-z_.-]/n) {|c| sprintf('%%%02X', c.unpack('C').first) }
+    end
+    #}}}
     # htmlescape  : Get HTML-escaped string {{{
     def htmlescape(str)
-      return CGI.escapeHTML(str)
+      return str.gsub(/['"&<>]/, { "'" => '&#39;', '"' => '&quot;', '&' => '&amp;', '<' => '&lt;', '>' => '&gt;' })
     end
     #}}}
     # build_link  : Build a link {{{
