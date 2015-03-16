@@ -31,10 +31,6 @@ A parent directory of this path MUST be writable by Rutulys.
 
 This directory will be cleaned on build.
 
-Cache file name is converted from original one to URL-encoded string.
-As a character encoding, we use UTF-8.
-(e.g. `あいうえお` will be `%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A`.)
-
 #### Source path
 As known as `@sourcepath`.
 
@@ -65,6 +61,9 @@ Before running Rutulys, you have to `cd` to your source path.
   \_ image
       \_ ...
   \_ archive
+       \_ (Cache file)
+       \_ ...
+  \_ category
        \_ (Cache file)
        \_ ...
 

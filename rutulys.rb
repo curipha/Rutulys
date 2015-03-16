@@ -29,18 +29,12 @@ module Rutulys
     def initialize(*args)
       @category = []
     end
-
-    def link
-      return "/archive/#{cache}"
-    end
-    def cache
-      return @cache ||= Util::urlencode(@title)  # URI encoded title
-    end
   end
 
   # Article class {{{
   class Article < Page
     YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
+    CATEGORY_PATTERN  = /\A[0-9A-Za-z-]+\z/u
 
     attr_reader :yaml
 
@@ -56,6 +50,12 @@ module Rutulys
       @title = @name if @title.nil?            # Title
     end
 
+    def cache
+      return "archive/#{@name}.html"          # Local file (destination)
+    end
+    def link
+      return "/archive/#{Util::urlencode(@name)}" # Link path
+    end
     def content
       raw = @path.read(mode: 'rb:utf-8')
       raw = raw.sub(YAML_FRONT_MATTER, '') if @yaml
@@ -82,8 +82,9 @@ module Rutulys
           @title = front['title'].strip unless front['title'].to_s.empty?
 
           unless front['category'].nil?
-            front['category'] = front['category'].to_s.split(' ') unless front['category'].is_a?(Array)
-            @category = front['category'].uniq.inject([]) {|result, category| result << Rutulys::Category.new(category) }
+            @category = front['category'].to_s.split(' ').uniq.inject([]) {|result, category|
+              (category =~ CATEGORY_PATTERN) ? result << Rutulys::Category.new(category) : result
+            }
           end
         end
       end
@@ -96,7 +97,7 @@ module Rutulys
       super
 
       @name  = title
-      @title = "Category:#{title}"
+      @title = "Category: #{title}"
 
       @articles = []
     end
@@ -108,6 +109,12 @@ module Rutulys
       return @articles.length
     end
 
+    def cache
+      return "category/#{@name}.html"
+    end
+    def link
+      return "/category/#{Util::urlencode(@name)}"
+    end
     def content
       return @articles.sort.inject([]) {|result, entry| result << yield(entry) }.join("\n")
     end
@@ -318,7 +325,7 @@ module Rutulys
 
     # cachepath   : Get path to a cache file {{{
     def cachepath(cache)
-      return @deploypath + "archive/#{cache}.html"
+      return @deploypath + cache
     end
     #}}}
     # configpath  : Get path to the configuration file {{{

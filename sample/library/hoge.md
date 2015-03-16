@@ -1,5 +1,5 @@
 ---
-category: ["Category with space", "Multiple"]
+category: baz
 ---
 
 # Hoge
