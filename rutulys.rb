@@ -246,7 +246,7 @@ module Rutulys
 
       if @category_list.nil?
         @category_list = @category.inject([]) {|result, category|
-          result << "<li>#{build_link(category.link, category.name)} <small>#{category.count}</small></li>"
+          result << "<li>#{Util::build_link(category.link, category.name)} <small>#{category.count}</small></li>"
         }.join("\n")
       end
 
@@ -286,7 +286,7 @@ module Rutulys
         raw = entry.content
       when entry.is_a?(Rutulys::Category)
         raw = entry.content {|localentry|
-          "- #{build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(@categ_timeformat)})"
+          "- #{Util::build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(@categ_timeformat)})"
         }
       else
         err "Process skipped since entry type unknown (#{entry})"
@@ -295,14 +295,14 @@ module Rutulys
       content = parser(raw).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
-      fputs(cachepath(entry.cache),
+      Util::fputs(cachepath(entry.cache),
             sprintf(@html_template, {
-              title:     htmlstr(entry.title),
-              category:  entry.category.sort.inject([]) {|result, cat| result << build_link(cat.link, cat.name)}.join("\n"),
-              canonical: htmlstr(@baseuri + entry.link),
-              modified:  entry.mtime.nil? ? '' : htmlstr(entry.mtime.strftime(@timeformat)),
-              next:      entry.next.nil?  ? '' : "<div id=\"next\">#{build_link(entry.next.link, entry.next.title)}</div>",
-              prev:      entry.prev.nil?  ? '' : "<div id=\"prev\">#{build_link(entry.prev.link, entry.prev.title)}</div>",
+              title:     Util::htmlstr(entry.title),
+              category:  entry.category.sort.inject([]) {|result, cat| result << Util::build_link(cat.link, cat.name)}.join("\n"),
+              canonical: Util::htmlstr(@baseuri + entry.link),
+              modified:  entry.mtime.nil? ? '' : Util::htmlstr(entry.mtime.strftime(@timeformat)),
+              next:      entry.next.nil?  ? '' : "<div id=\"next\">#{Util::build_link(entry.next.link, entry.next.title)}</div>",
+              prev:      entry.prev.nil?  ? '' : "<div id=\"prev\">#{Util::build_link(entry.prev.link, entry.prev.title)}</div>",
               content:   content,
               categlist: @category_list
             })
@@ -343,6 +343,33 @@ module Rutulys
     end
     #}}}
 
+    # log         : Display log message (Never to call directly. Use `err` or `msg`) {{{
+    def log(str)
+      @mutex.synchronize {
+        warn "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S.%04N")}] #{str}"
+      }
+    end
+    #}}}
+    # err         : Display continuable error message {{{
+    def err(str)
+      log("\033[1;31m#{str}\033[0m")
+    end
+    #}}}
+    # msg         : Display message {{{
+    def msg(str)
+      log(str) if @verbose
+    end
+    #}}}
+    # msgb        : Display bold message {{{
+    def msgb(str)
+      log("\033[1m#{str}\033[0m")
+    end
+    #}}}
+  end
+
+  module Util
+    extend self
+
     # htmlstr     : Get HTML-escaped string {{{
     def htmlstr(str)
       return CGI.escapeHTML(str)
@@ -368,31 +395,7 @@ module Rutulys
       path.chmod(0444)
     end
     #}}}
-
-    # log         : Display log message (Never to call directly. Use `err` or `msg`) {{{
-    def log(str)
-      @mutex.synchronize {
-        warn "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S.%04N")}] #{str}"
-      }
-    end
-    #}}}
-    # err         : Display continuable error message {{{
-    def err(str)
-      log("\033[1;31m#{str}\033[0m")
-    end
-    #}}}
-    # msg         : Display message {{{
-    def msg(str)
-      log(str) if @verbose
-    end
-    #}}}
-    # msgb        : Display bold message {{{
-    def msgb(str)
-      log("\033[1m#{str}\033[0m")
-    end
-    #}}}
   end
-
 end
 
 r = Rutulys::Main.new
