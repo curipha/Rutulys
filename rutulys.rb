@@ -294,12 +294,12 @@ module Rutulys
       content = parser(raw).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
-      Util::fputs(cachepath(entry.cache),
+      Util::write(cachepath(entry.cache),
             sprintf(@html_template, {
-              title:     Util::htmlstr(entry.title),
+              title:     Util::htmlescape(entry.title),
               category:  entry.category.sort.inject([]) {|result, cat| result << Util::build_link(cat.link, cat.name)}.join("\n"),
-              canonical: Util::htmlstr(@baseuri + entry.link),
-              modified:  entry.mtime.nil? ? '' : Util::htmlstr(entry.mtime.strftime(@timeformat)),
+              canonical: Util::htmlescape(@baseuri + entry.link),
+              modified:  entry.mtime.nil? ? '' : Util::htmlescape(entry.mtime.strftime(@timeformat)),
               next:      entry.next.nil?  ? '' : "<div id=\"next\">#{Util::build_link(entry.next.link, entry.next.title)}</div>",
               prev:      entry.prev.nil?  ? '' : "<div id=\"prev\">#{Util::build_link(entry.prev.link, entry.prev.title)}</div>",
               content:   content,
