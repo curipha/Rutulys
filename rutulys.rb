@@ -370,8 +370,8 @@ module Rutulys
   module Util
     extend self
 
-    # htmlstr     : Get HTML-escaped string {{{
-    def htmlstr(str)
+    # htmlescape  : Get HTML-escaped string {{{
+    def htmlescape(str)
       return CGI.escapeHTML(str)
     end
     #}}}
@@ -381,8 +381,8 @@ module Rutulys
     end
     #}}}
 
-    # fputs       : Write string to file {{{
-    def fputs(path, str)
+    # write       : Write string to file {{{
+    def write(path, str)
       path.dirname.mkpath unless path.dirname.exist?
       path.chmod(0644) if path.exist?
       path.open('w+b:utf-8') {|fp|
