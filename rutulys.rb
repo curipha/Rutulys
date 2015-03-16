@@ -41,13 +41,13 @@ module Rutulys
     def initialize(path)
       super
 
-      @path  = path                            # Full path of file (e.g. /home/jane/file.ext )
-      @name  = path.basename('.*').to_s.strip  # Name of file      (e.g.            file     )
-      @mtime = path.mtime                      # Modified time of file (Time object)
+      @path  = path                           # Full path of file (source) (e.g. /home/jane/file.ext )
+      @name  = path.basename('.*').to_s.strip # Name of file               (e.g.            file     )
+      @mtime = path.mtime                     # Modified time of file (Time object)
 
       load_yamlheader
 
-      @title = @name if @title.nil?            # Title
+      @title = @name if @title.nil?           # Title
     end
 
     def cache
@@ -126,9 +126,7 @@ module Rutulys
   #}}}
 
   class Main
-    # Accessors {{{
     attr_accessor :verbose, :threads
-    #}}}
 
     # initialize  : Constructor {{{
     def initialize
@@ -238,7 +236,6 @@ module Rutulys
       @category = categories.sort
     end
     #}}}
-
     # generator   : Create cache files in parallel {{{
     def generator(list)
       # Clear the deploy directory
@@ -304,7 +301,7 @@ module Rutulys
       Util::write(cachepath(entry.cache),
             sprintf(@html_template, {
               title:     Util::htmlescape(entry.title),
-              category:  entry.category.sort.inject([]) {|result, cat| result << Util::build_link(cat.link, cat.name)}.join("\n"),
+              category:  entry.category.sort.inject([]) {|list, cat| list << Util::build_link(cat.link, cat.name)}.join("\n"),
               canonical: Util::htmlescape(@baseuri + entry.link),
               modified:  entry.mtime.nil? ? '' : Util::htmlescape(entry.mtime.strftime(@timeformat)),
               next:      entry.next.nil?  ? '' : "<div id=\"next\">#{Util::build_link(entry.next.link, entry.next.title)}</div>",
