@@ -22,6 +22,80 @@ module Rutulys
     include Rouge::Plugins::Redcarpet
   end
 
+  class Configure
+    attr_reader :sourcepath, :deploypath
+    attr_reader :baseuri, :timeformat, :categ_timeformat
+
+    attr_accessor :verbose, :threads
+
+    def initialize
+      @sourcepath = Pathname.pwd
+
+      # Configurable variables
+      @verbose = false
+      @threads = 4
+
+      loadconfig
+    end
+
+    # cachepath   : Get path to a cache file {{{
+    def cachepath(cache)
+      return @deploypath + cache
+    end
+    #}}}
+    # templatepath: Get path to the template file {{{
+    def templatepath
+      return @sourcepath + 'template.html'
+    end
+    #}}}
+    # librarypath : Get path to the library directory {{{
+    def librarypath
+      return @sourcepath + 'library'
+    end
+    #}}}
+    # assetpath   : Get path to the asset directory {{{
+    def assetpath
+      return @sourcepath + 'asset'
+    end
+    #}}}
+
+    private
+
+    # configpath  : Get path to the configuration file {{{
+    def configpath
+      return @sourcepath + 'config.yaml'
+    end
+    #}}}
+    # loadconfig  : Load configuration file {{{
+    def loadconfig
+      abort "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
+
+      config = YAML.load_file(configpath, safe: true)
+
+      # Paths
+      @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
+
+      # Settings
+      @baseuri    = config['baseuri']  # Must be same location as @deploypath
+      @timeformat = config['timeformat']  # Used for strftime in generating HTML
+
+      @categ_timeformat = config['category']['timeformat']  # Used for strftime in generating HTML
+
+
+      # Validation
+      err = []
+
+      err << "Template file (#{templatepath}) does not exist or is not readable." unless templatepath.readable?
+      err << "Parent directory of deploying point (#{@deploypath}) does not exist or is not writable." unless @deploypath.dirname.writable?
+
+      unless err.empty?
+        err.each {|m| Log::err(m) }
+        abort
+      end
+    end
+    #}}}
+  end
+
   # Page class {{{
   class Page
     attr_reader   :path, :name, :title, :mtime, :category
@@ -126,9 +200,13 @@ module Rutulys
   end
   #}}}
 
-  class Main
-    attr_accessor :verbose, :threads
+  class << self
+    def config
+      return @config ||= Configure.new
+    end
+  end
 
+  class Main
     # initialize  : Constructor {{{
     def initialize
       # Internal variables
@@ -141,9 +219,6 @@ module Rutulys
       @html_template = nil
       @category_list = nil
 
-      # Internal settings
-      @sourcepath = Pathname.pwd
-
       # Prepare markdown renderer
       @render = Redcarpet::Markdown.new(Rutulys::Render, {
         no_intra_emphasis: true,
@@ -153,17 +228,11 @@ module Rutulys
         space_after_headers: true,
         superscript: true
       })
-
-      # Configurable variables
-      @verbose = false
-      @threads = 4
     end
     # }}}
 
     # build       : Build mode {{{
     def build
-      loadconfig
-
       indexer
       generator(@index + @category)
       setasset
@@ -174,39 +243,10 @@ module Rutulys
 
     private
 
-    # loadconfig  : Load configuration file {{{
-    def loadconfig
-      abort "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
-
-      config = YAML.load_file(configpath, safe: true)
-
-      # Paths
-      @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
-
-      # Settings
-      @baseuri    = config['baseuri']  # Must be same location as @deploypath
-      @timeformat = config['timeformat']  # Used for strftime in generating HTML
-
-      @categ_timeformat = config['category']['timeformat']  # Used for strftime in generating HTML
-
-
-      # Validation
-      err = []
-
-      err << "Template file (#{templatepath}) does not exist or is not readable." unless templatepath.readable?
-      err << "Parent directory of deploying point (#{@deploypath}) does not exist or is not writable." unless @deploypath.dirname.writable?
-
-      unless err.empty?
-        err.each {|m| err(m) }
-        abort
-      end
-    end
-    #}}}
-
     # indexer     : Get an index for source file(s) {{{
     def indexer
       articles = []
-      librarypath.each_child {|path|
+      Rutulys::config.librarypath.each_child {|path|
         next unless path.file?
         next unless path.readable?
 
@@ -241,13 +281,13 @@ module Rutulys
     # generator   : Create cache files in parallel {{{
     def generator(list)
       # Clear the deploy directory
-      if @deploypath.exist?
-        @deploypath.rmtree
-        @deploypath.mkdir
+      if Rutulys::config.deploypath.exist?
+        Rutulys::config.deploypath.rmtree
+        Rutulys::config.deploypath.mkdir
       end
 
       # Prepare template cache
-      @html_template ||= templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
+      @html_template ||= Rutulys::config.templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
 
       if @category_list.nil?
         @category_list = @category.inject([]) {|result, category|
@@ -260,7 +300,7 @@ module Rutulys
       list.each {|l| queue.push(l) }
 
       threads = []
-      @threads.times {
+      Rutulys::config.threads.times {
         queue.push(nil) # Thread kill signal
 
         threads << Thread.new {
@@ -273,14 +313,14 @@ module Rutulys
       threads.each {|t| t.join }
 
       # Create symbolic link to newest cache
-      (@deploypath + 'index.html').make_symlink(cachepath(@index.first.cache).relative_path_from(@deploypath))
+      (Rutulys::config.deploypath + 'index.html').make_symlink(Rutulys::config.cachepath(@index.first.cache).relative_path_from(Rutulys::config.deploypath))
     end
     #}}}
     # setasset    : Copy asset files to deploying point {{{
     def setasset
-      return unless assetpath.directory?
+      return unless Rutulys::config.assetpath.directory?
 
-      FileUtils.cp_r(assetpath.children, @deploypath)
+      FileUtils.cp_r(Rutulys::config.assetpath.children, Rutulys::config.deploypath)
     end
     #}}}
 
@@ -291,7 +331,7 @@ module Rutulys
         raw = entry.content
       when entry.is_a?(Rutulys::Category)
         raw = entry.content {|localentry|
-          "- #{Util::build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(@categ_timeformat)})"
+          "- #{Util::build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(Rutulys::config.categ_timeformat)})"
         }
       else
         err "Process skipped since entry type unknown (#{entry})"
@@ -300,12 +340,12 @@ module Rutulys
       content = parser(raw).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
-      Util::write(cachepath(entry.cache),
+      Util::write(Rutulys::config.cachepath(entry.cache),
         sprintf(@html_template, {
           title:     Util::htmlescape(entry.title),
           category:  entry.category.sort.inject([]) {|list, cat| list << Util::build_link(cat.link, cat.name)}.join("\n"),
-          canonical: Util::htmlescape(@baseuri + entry.link),
-          modified:  entry.mtime.nil? ? '' : Util::htmlescape(entry.mtime.strftime(@timeformat)),
+          canonical: Util::htmlescape(Rutulys::config.baseuri + entry.link),
+          modified:  entry.mtime.nil? ? '' : Util::htmlescape(entry.mtime.strftime(Rutulys::config.timeformat)),
           next:      entry.next.nil?  ? '' : "<div id=\"next\">#{Util::build_link(entry.next.link, entry.next.title)}</div>",
           prev:      entry.prev.nil?  ? '' : "<div id=\"prev\">#{Util::build_link(entry.prev.link, entry.prev.title)}</div>",
           content:   content,
@@ -323,31 +363,6 @@ module Rutulys
     #}}}
   end
 
-    # cachepath   : Get path to a cache file {{{
-    def cachepath(cache)
-      return @deploypath + cache
-    end
-    #}}}
-    # configpath  : Get path to the configuration file {{{
-    def configpath
-      return @sourcepath + 'config.yaml'
-    end
-    #}}}
-    # templatepath: Get path to the template file {{{
-    def templatepath
-      return @sourcepath + 'template.html'
-    end
-    #}}}
-    # librarypath : Get path to the library directory {{{
-    def librarypath
-      return @sourcepath + 'library'
-    end
-    #}}}
-    # assetpath   : Get path to the asset directory {{{
-    def assetpath
-      return @sourcepath + 'asset'
-    end
-    #}}}
   # Log class {{{
   module Log
     extend self
@@ -359,7 +374,7 @@ module Rutulys
     #}}}
     # msg         : Display message {{{
     def msg(str)
-      log(str) if @verbose
+      log(str) if Rutulys::config.verbose
     end
     #}}}
     # msgb        : Display bold message {{{
@@ -420,14 +435,14 @@ OptionParser.new do |op|
   op.version = '0.1.1'
 
   op.on('--verbose', 'Verbose mode') {|flag|
-    r.verbose = flag
+    Rutulys::config.verbose = flag
   }
-  op.on('-t THREAD', '--thread=THREAD', "Set a number of thread to build a page (Default = #{r.threads})") {|value|
+  op.on('-t THREAD', '--thread=THREAD', "Set a number of thread to build a page (Default = #{Rutulys::config.threads})") {|value|
     thread = value.to_i
 
     abort "THREAD (#{value.inspect}) should be between 1 and 20." unless thread.between?(1, 20)
 
-    r.threads = thread
+    Rutulys::config.threads = thread
   }
 
   op.on('-b', '--build', 'Create caches for ALL entries') {|flag|
