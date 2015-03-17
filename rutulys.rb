@@ -234,8 +234,8 @@ module Rutulys
           previous.next = current
         }
       }
-      @index    = articles.sort
-      @category = categories.sort
+      @index    = articles.sort.freeze
+      @category = categories.sort.freeze
     end
     #}}}
     # generator   : Create cache files in parallel {{{
