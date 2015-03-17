@@ -7,7 +7,6 @@ It just outputs a HTML file from a markdown text using [Redcarpet](https://githu
 
 Rutulys requires Ruby 2.1.0 and over with following gems.
 
-- `rubygems`
 - `redcarpet`
 - `rouge`
 - `safe_yaml`
