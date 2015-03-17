@@ -22,6 +22,7 @@ module Rutulys
     include Rouge::Plugins::Redcarpet
   end
 
+  # Configure class {{{
   class Configure
     attr_reader :sourcepath, :deploypath
     attr_reader :baseuri, :timeformat, :categ_timeformat
@@ -38,35 +39,32 @@ module Rutulys
       loadconfig
     end
 
-    # cachepath   : Get path to a cache file {{{
-    def cachepath(cache)
-      return @deploypath + cache
-    end
-    #}}}
-    # templatepath: Get path to the template file {{{
-    def templatepath
-      return @sourcepath + 'template.html'
-    end
-    #}}}
-    # librarypath : Get path to the library directory {{{
-    def librarypath
-      return @sourcepath + 'library'
-    end
-    #}}}
-    # assetpath   : Get path to the asset directory {{{
-    def assetpath
-      return @sourcepath + 'asset'
-    end
-    #}}}
 
-    private
-
-    # configpath  : Get path to the configuration file {{{
+    # Get path to the configuration file
     def configpath
       return @sourcepath + 'config.yaml'
     end
-    #}}}
-    # loadconfig  : Load configuration file {{{
+    # Get path to the template file
+    def templatepath
+      return @sourcepath + 'template.html'
+    end
+
+    # Get path to a cache file
+    def cachepath(cache)
+      return @deploypath + cache
+    end
+    # Get path to the library directory
+    def librarypath
+      return @sourcepath + 'library'
+    end
+    # Get path to the asset directory
+    def assetpath
+      return @sourcepath + 'asset'
+    end
+
+    private
+
+    # Load configuration file {{{
     def loadconfig
       abort "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
 
@@ -76,7 +74,7 @@ module Rutulys
       @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
 
       # Settings
-      @baseuri    = config['baseuri']  # Must be same location as @deploypath
+      @baseuri    = config['baseuri']     # Must be same location as @deploypath
       @timeformat = config['timeformat']  # Used for strftime in generating HTML
 
       @categ_timeformat = config['category']['timeformat']  # Used for strftime in generating HTML
@@ -95,6 +93,7 @@ module Rutulys
     end
     #}}}
   end
+  #}}}
 
   # Page class {{{
   class Page
@@ -207,7 +206,7 @@ module Rutulys
   end
 
   class Main
-    # initialize  : Constructor {{{
+    # Constructor {{{
     def initialize
       # Internal variables
       @now = Time.now
@@ -231,7 +230,6 @@ module Rutulys
     end
     # }}}
 
-    # build       : Build mode {{{
     def build
       indexer
       generator(@index + @category)
@@ -239,11 +237,10 @@ module Rutulys
 
       Log::msgb 'I did everything I could :)'
     end
-    #}}}
 
     private
 
-    # indexer     : Get an index for source file(s) {{{
+    # Get an index for source file(s) {{{
     def indexer
       articles = []
       Rutulys::config.librarypath.each_child {|path|
@@ -278,7 +275,7 @@ module Rutulys
       @category = categories.sort.freeze
     end
     #}}}
-    # generator   : Create cache files in parallel {{{
+    # Create cache files in parallel {{{
     def generator(list)
       # Clear the deploy directory
       if Rutulys::config.deploypath.exist?
@@ -316,7 +313,7 @@ module Rutulys
       (Rutulys::config.deploypath + 'index.html').make_symlink(Rutulys::config.cachepath(@index.first.cache).relative_path_from(Rutulys::config.deploypath))
     end
     #}}}
-    # setasset    : Copy asset files to deploying point {{{
+    # Copy asset files to deploying point {{{
     def setasset
       return unless Rutulys::config.assetpath.directory?
 
@@ -324,7 +321,7 @@ module Rutulys
     end
     #}}}
 
-    # create_cache: Create cache file {{{
+    # Create cache file {{{
     def create_cache(entry)
       case
       when entry.is_a?(Rutulys::Article)
@@ -356,7 +353,7 @@ module Rutulys
       Log::msg "Create a cache file for: #{entry.path.nil? ? '-' : entry.path} (#{entry.title})"
     end
     #}}}
-    # parser      : Generate a parsed string {{{
+    # Generate a parsed string {{{
     def parser(str)
       return @render.render(str)
     end
@@ -367,62 +364,54 @@ module Rutulys
   module Log
     extend self
 
-    # err         : Display continuable error message {{{
+    # Display continuable error message
     def err(str)
       log("\033[1;31m#{str}\033[0m")
     end
-    #}}}
-    # msg         : Display message {{{
+    # Display message
     def msg(str)
       log(str) if Rutulys::config.verbose
     end
-    #}}}
-    # msgb        : Display bold message {{{
+    # Display bold message
     def msgb(str)
       log("\033[1m#{str}\033[0m")
     end
-    #}}}
 
     private
     MUTEX = Mutex.new  # Giant lock ;p
 
-    # log         : Display log message {{{
+    # Display log message
     def log(str)
       MUTEX.synchronize {
         warn "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S.%04N")}] #{str}"
       }
     end
-    #}}}
   end
   #}}}
   # Util class {{{
   module Util
     module_function
 
-    # urlencode   : Get URL-encoded string {{{
+    # Get URL-encoded string
     def urlencode(str)
       return str.to_s.b.gsub(/[^0-9A-Za-z_.-]/n) {|c| sprintf('%%%02X', c.unpack('C').first) }
     end
-    #}}}
-    # htmlescape  : Get HTML-escaped string {{{
+    # Get HTML-escaped string
     def htmlescape(str)
       return str.gsub(/['"&<>]/, { "'" => '&#39;', '"' => '&quot;', '&' => '&amp;', '<' => '&lt;', '>' => '&gt;' })
     end
-    #}}}
-    # build_link  : Build a link {{{
+    # Build a link
     def build_link(uri, name)
       return "<a href=\"#{htmlescape(uri)}\">#{htmlescape(name)}</a>"
     end
-    #}}}
 
-    # write       : Write string to file {{{
+    # Write string to file
     def write(path, str)
       path.dirname.mkpath unless path.dirname.exist?
       path.chmod(0644) if path.exist?
       path.write(str, nil, mode: 'w+b:utf-8')
       path.chmod(0444)
     end
-    #}}}
   end
   #}}}
 end
