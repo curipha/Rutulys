@@ -205,24 +205,18 @@ module Rutulys
 
     # indexer     : Get an index for source file(s) {{{
     def indexer
-      list = []
+      articles = []
       librarypath.each_child {|path|
         next unless path.file?
         next unless path.readable?
 
-        list << Rutulys::Article.new(path)
+        articles << Rutulys::Article.new(path)
       }
 
-      abort 'No source file is found.' if list.empty?
-
-      list.sort.each_cons(2) {|current, previous|
-        current.prev  = previous
-        previous.next = current
-      }
-      @index = list.sort
+      abort 'No source file is found.' if articles.empty?
 
       categories = []
-      list.each {|article|
+      articles.each {|article|
         article.category.each {|entry_category|
           categobj = categories.find {|category| category.name == entry_category.name }
           if categobj.nil?
@@ -233,6 +227,14 @@ module Rutulys
           categobj.add(article)
         }
       }
+
+      [articles, categories].each {|index|
+        index.sort.each_cons(2) {|current, previous|
+          current.prev  = previous
+          previous.next = current
+        }
+      }
+      @index    = articles.sort
       @category = categories.sort
     end
     #}}}
