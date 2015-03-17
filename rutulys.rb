@@ -39,7 +39,6 @@ module Rutulys
       loadconfig
     end
 
-
     # Get path to the configuration file
     def configpath
       return @sourcepath + 'config.yaml'
@@ -82,7 +81,6 @@ module Rutulys
 
       # Validation
       err = []
-
       err << "Template file (#{templatepath}) does not exist or is not readable." unless templatepath.readable?
       err << "Parent directory of deploying point (#{@deploypath}) does not exist or is not writable." unless @deploypath.dirname.writable?
 
