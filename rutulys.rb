@@ -22,6 +22,7 @@ module Rutulys
     include Rouge::Plugins::Redcarpet
   end
 
+  # Page class {{{
   class Page
     attr_reader   :path, :name, :title, :mtime, :category
     attr_accessor :next, :prev
@@ -30,7 +31,7 @@ module Rutulys
       @category = []
     end
   end
-
+  #}}}
   # Article class {{{
   class Article < Page
     YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
@@ -378,6 +379,7 @@ module Rutulys
     #}}}
   end
   #}}}
+  # Util class {{{
   module Util
     extend self
 
@@ -406,6 +408,7 @@ module Rutulys
     end
     #}}}
   end
+  #}}}
 end
 
 r = Rutulys::Main.new
