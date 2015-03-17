@@ -381,7 +381,7 @@ module Rutulys
   #}}}
   # Util class {{{
   module Util
-    extend self
+    module_function
 
     # urlencode   : Get URL-encoded string {{{
     def urlencode(str)
