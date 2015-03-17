@@ -154,11 +154,6 @@ Rutulys generates `index.html` automatically as symbolic link to the newest cach
 If `index.html` is already exists, it will be replaced.
 
 
-Extend Rutulys
---------------
-`parser` method can be overridden to implement text syntax parser.
-
-
 Related rich products
 ---------------------
 - blosxom http://blosxom.sourceforge.net/
