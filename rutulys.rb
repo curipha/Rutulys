@@ -321,6 +321,7 @@ module Rutulys
       return @render.render(str)
     end
     #}}}
+  end
 
     # cachepath   : Get path to a cache file {{{
     def cachepath(cache)
