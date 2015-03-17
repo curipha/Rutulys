@@ -334,7 +334,7 @@ module Rutulys
         err "Process skipped since entry type unknown (#{entry})"
         return
       end
-      content = parser(raw).strip
+      content = @render.render(raw).strip
       err "Empty cache file will be created for #{entry.path}" if content.empty?
 
       Util::write(Rutulys::config.cachepath(entry.cache),
@@ -351,11 +351,6 @@ module Rutulys
       )
 
       Log::msg "Create a cache file for: #{entry.path.nil? ? '-' : entry.path} (#{entry.title})"
-    end
-    #}}}
-    # Generate a parsed string {{{
-    def parser(str)
-      return @render.render(str)
     end
     #}}}
   end
