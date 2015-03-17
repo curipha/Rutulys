@@ -132,7 +132,6 @@ module Rutulys
     def initialize
       # Internal variables
       @now = Time.now
-      @mutex = Mutex.new  # Giant lock ;p
 
       @index    = [] # Internal index for source file
       @category = [] # Internal index for category
@@ -168,7 +167,7 @@ module Rutulys
       generator(@index + @category)
       setasset
 
-      msgb 'I did everything I could :)'
+      Log::msgb 'I did everything I could :)'
     end
     #}}}
 
@@ -313,7 +312,7 @@ module Rutulys
         })
       )
 
-      msg "Create a cache file for: #{entry.path.nil? ? '-' : entry.path} (#{entry.title})"
+      Log::msg "Create a cache file for: #{entry.path.nil? ? '-' : entry.path} (#{entry.title})"
     end
     #}}}
     # parser      : Generate a parsed string {{{
@@ -347,14 +346,10 @@ module Rutulys
       return @sourcepath + 'asset'
     end
     #}}}
+  # Log class {{{
+  module Log
+    extend self
 
-    # log         : Display log message (Never to call directly. Use `err` or `msg`) {{{
-    def log(str)
-      @mutex.synchronize {
-        warn "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S.%04N")}] #{str}"
-      }
-    end
-    #}}}
     # err         : Display continuable error message {{{
     def err(str)
       log("\033[1;31m#{str}\033[0m")
@@ -370,8 +365,19 @@ module Rutulys
       log("\033[1m#{str}\033[0m")
     end
     #}}}
-  end
 
+    private
+    MUTEX = Mutex.new  # Giant lock ;p
+
+    # log         : Display log message {{{
+    def log(str)
+      MUTEX.synchronize {
+        warn "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S.%04N")}] #{str}"
+      }
+    end
+    #}}}
+  end
+  #}}}
   module Util
     extend self
 
