@@ -15,11 +15,10 @@ deploypath: './www'
 # WWW base path
 baseuri: 'http://www.example.com/path/to/base'
 
-# Used for strftime in generating HTML
+# Article modification date format
 timeformat: '%b %-d, %Y %H:%M:%S %Z'
 
+# Article modification date format for category page
+categorydate: '%b %-d, %Y'
 
-# For category page
-category:
-  # Used for strftime in generating HTML
-  timeformat: '%b %-d, %Y'
+

@@ -25,7 +25,7 @@ module Rutulys
   # Configuration class {{{
   class Configuration
     attr_reader :sourcepath, :deploypath
-    attr_reader :baseuri, :timeformat, :categ_timeformat
+    attr_reader :baseuri, :timeformat, :categorydate
 
     attr_accessor :verbose, :threads
 
@@ -76,7 +76,7 @@ module Rutulys
       @baseuri    = config['baseuri']     # Must be same location as @deploypath
       @timeformat = config['timeformat']  # Used for strftime in generating HTML
 
-      @categ_timeformat = config['category']['timeformat']  # Used for strftime in generating HTML
+      @categorydate = config['categorydate']  # Used for strftime in generating HTML
 
 
       # Validation
@@ -319,7 +319,7 @@ module Rutulys
         raw = entry.content
       when entry.is_a?(Rutulys::Category)
         raw = entry.content {|localentry|
-          "- #{Util::build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(Rutulys::config.categ_timeformat)})"
+          "- #{Util::build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(Rutulys::config.categorydate)})"
         }
       else
         err "Process skipped since entry type unknown (#{entry})"
