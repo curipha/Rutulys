@@ -182,7 +182,9 @@ module Rutulys
       return "/category/#{Util::urlencode(@name)}"
     end
     def content
-      return @articles.sort.inject([]) {|result, entry| result << yield(entry) }.join("\n")
+      return @articles.sort.inject([]) {|result, entry|
+        result << "- #{Util::build_link(entry.link, entry.title)} (#{entry.mtime.strftime(Rutulys::config.categorydate)})"
+      }.join("\n")
     end
 
     def <=>(obj)
@@ -314,18 +316,7 @@ module Rutulys
 
     # Create cache file {{{
     def create_cache(entry)
-      case
-      when entry.is_a?(Rutulys::Article)
-        raw = entry.content
-      when entry.is_a?(Rutulys::Category)
-        raw = entry.content {|localentry|
-          "- #{Util::build_link(localentry.link, localentry.title)} (#{localentry.mtime.strftime(Rutulys::config.categorydate)})"
-        }
-      else
-        err "Process skipped since entry type unknown (#{entry})"
-        return
-      end
-      content = @render.render(raw).strip
+      content = @render.render(entry.content).strip
       Log::msgr "Empty cache file will be created for #{entry.path}" if content.empty?
 
       Util::write(Rutulys::config.cachepath(entry.cache),
