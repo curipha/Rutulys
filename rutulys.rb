@@ -83,11 +83,7 @@ module Rutulys
       err = []
       err << "Template file (#{templatepath}) does not exist or is not readable." unless templatepath.readable?
       err << "Parent directory of deploying point (#{@deploypath}) does not exist or is not writable." unless @deploypath.dirname.writable?
-
-      unless err.empty?
-        err.each {|m| Log::err(m) }
-        abort
-      end
+      Log::err(err)
     end
     #}}}
   end
@@ -248,7 +244,7 @@ module Rutulys
         articles << Rutulys::Article.new(path)
       }
 
-      abort 'No source file is found.' if articles.empty?
+      Log::err 'No source file is found.' if articles.empty?
 
       categories = []
       articles.each {|article|
@@ -333,7 +329,7 @@ module Rutulys
         return
       end
       content = @render.render(raw).strip
-      err "Empty cache file will be created for #{entry.path}" if content.empty?
+      Log::msgr "Empty cache file will be created for #{entry.path}" if content.empty?
 
       Util::write(Rutulys::config.cachepath(entry.cache),
         sprintf(@html_template, {
@@ -357,26 +353,34 @@ module Rutulys
   module Log
     extend self
 
-    # Display continuable error message
+    # Display error message
     def err(str)
-      log("\033[1;31m#{str}\033[0m")
+      return if str.empty?
+
+      msgr(str)
+      abort
     end
+
     # Display message
     def msg(str)
-      log(str) if Rutulys::config.verbose
+      log(str) {|s| s } if Rutulys::config.verbose
     end
     # Display bold message
     def msgb(str)
-      log("\033[1m#{str}\033[0m")
+      log(str) {|s| "\033[1m#{s}\033[0m" }
+    end
+    # Display red message
+    def msgr(str)
+      log(str) {|s| "\033[1;31m#{s}\033[0m" }
     end
 
     private
     MUTEX = Mutex.new  # Giant lock ;p
 
     # Display log message
-    def log(str)
-      MUTEX.synchronize {
-        warn "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S.%04N")}] #{str}"
+    def log(*msgarr)
+      msgarr.flatten.each {|msg|
+        MUTEX.synchronize { warn "[#{Time.now.strftime('%H:%M:%S.%04N')}] #{yield(msg)}" }
       }
     end
   end
