@@ -22,8 +22,8 @@ module Rutulys
     include Rouge::Plugins::Redcarpet
   end
 
-  # Configure class {{{
-  class Configure
+  # Configuration class {{{
+  class Configuration
     attr_reader :sourcepath, :deploypath
     attr_reader :baseuri, :timeformat, :categ_timeformat
 
@@ -115,7 +115,7 @@ module Rutulys
 
       load_yamlheader
 
-      @title = @name if @title.nil?           # Title
+      @title ||= @name                        # Title
     end
 
     def cache
@@ -126,14 +126,12 @@ module Rutulys
     end
     def content
       raw = @path.read(mode: 'rb:utf-8')
-      raw = raw.sub(YAML_FRONT_MATTER, '') if @yaml
-      return raw
+      return @yaml ? raw.sub(YAML_FRONT_MATTER, '') : raw
     end
 
     def <=>(obj)
       c = obj.mtime <=> @mtime  # descending
-      return c unless c == 0
-      return @title <=> obj.title
+      return (c == 0) ? (@title <=> obj.title) : c
     end
 
     private
@@ -195,7 +193,7 @@ module Rutulys
 
   class << self
     def config
-      return @config ||= Configure.new
+      return @config ||= Configuration.new
     end
   end
 
@@ -300,18 +298,17 @@ module Rutulys
           end
         }
       }
-
       threads.each {|t| t.join }
 
       # Create symbolic link to newest cache
-      (Rutulys::config.deploypath + 'index.html').make_symlink(Rutulys::config.cachepath(@index.first.cache).relative_path_from(Rutulys::config.deploypath))
+      (Rutulys::config.deploypath + 'index.html').make_symlink(
+        Rutulys::config.cachepath(@index.first.cache).relative_path_from(Rutulys::config.deploypath)
+      )
     end
     #}}}
     # Copy asset files to deploying point {{{
     def setasset
-      return unless Rutulys::config.assetpath.directory?
-
-      FileUtils.cp_r(Rutulys::config.assetpath.children, Rutulys::config.deploypath)
+      FileUtils.cp_r(Rutulys::config.assetpath.children, Rutulys::config.deploypath) if Rutulys::config.assetpath.directory?
     end
     #}}}
 
@@ -344,7 +341,7 @@ module Rutulys
         })
       )
 
-      Log::msg "Create a cache file for: #{entry.path.nil? ? '-' : entry.path} (#{entry.title})"
+      Log::msg "Create a cache file for: #{entry.path || '-'} (#{entry.title})"
     end
     #}}}
   end
