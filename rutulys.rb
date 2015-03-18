@@ -25,7 +25,7 @@ module Rutulys
   # Configuration class {{{
   class Configuration
     attr_reader :sourcepath, :deploypath
-    attr_reader :baseuri, :timeformat, :categorydate
+    attr_reader :baseuri, :timeformat, :categorydate, :categoryname
 
     attr_accessor :verbose, :threads
 
@@ -71,7 +71,8 @@ module Rutulys
         'deploypath'   => './www',
         'baseuri'      => '',
         'timeformat'   => '%b %-d, %Y %H:%M:%S %Z',
-        'categorydate' => '%b %-d, %Y'
+        'categorydate' => '%b %-d, %Y',
+        'categoryname' => {}
       }
 
       # Load configuration file
@@ -86,6 +87,7 @@ module Rutulys
       @baseuri      = config['baseuri']       # WWW base path (Must be same location as @deploypath)
       @timeformat   = config['timeformat']    # Article modification date format
       @categorydate = config['categorydate']  # Article modification date format for category page
+      @categoryname = config['categoryname']  # Category name list for displaying categories more pretty
 
       # Validation
       err = []
@@ -167,11 +169,14 @@ module Rutulys
   #}}}
   # Category class {{{
   class Category < Page
+    attr_reader :pname
+
     def initialize(title)
       super
 
       @name  = title
-      @title = "Category: #{title}"
+      @pname = Rutulys::config.categoryname[title] || title
+      @title = "Category: #{@pname}"
 
       @articles = []
     end
@@ -287,12 +292,9 @@ module Rutulys
 
       # Prepare template cache
       @html_template ||= Rutulys::config.templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
-
-      if @category_list.nil?
-        @category_list = @category.inject([]) {|result, category|
-          result << "<li>#{Util::build_link(category.link, category.name)} <small>#{category.count}</small></li>"
-        }.join("\n")
-      end
+      @category_list ||= @category.inject([]) {|result, category|
+        result << "<li>#{Util::build_link(category.link, category.pname)} <small>#{category.count}</small></li>"
+      }.join("\n")
 
       # Generate page caches
       queue = Queue.new

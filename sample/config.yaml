@@ -21,4 +21,8 @@ timeformat: '%b %-d, %Y %H:%M:%S %Z'
 # Article modification date format for category page
 categorydate: '%b %-d, %Y'
 
+# Category name list for displaying categories more pretty
+categoryname:
+  foo: "Foo"
+  bar: "BAR"
 
