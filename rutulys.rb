@@ -65,19 +65,27 @@ module Rutulys
 
     # Load configuration file {{{
     def loadconfig
-      abort "Configuration file (#{configpath}) does not exist or is not readable." unless configpath.readable?
 
-      config = YAML.load_file(configpath, safe: true)
+      # Set default value
+      config ={
+        'deploypath'   => './www',
+        'baseuri'      => '',
+        'timeformat'   => '%b %-d, %Y %H:%M:%S %Z',
+        'categorydate' => '%b %-d, %Y'
+      }
 
-      # Paths
-      @deploypath = Pathname.new(config['deploypath'])  # Deploy directory
+      # Load configuration file
+      if configpath.readable?
+        yaml = YAML.load_file(configpath, safe: true)
+        config = config.merge(yaml) if yaml.is_a?(Hash)
+      else
+        Log::msgr "Configuration file (#{configpath}) does not exist or is not readable."
+      end
 
-      # Settings
-      @baseuri    = config['baseuri']     # Must be same location as @deploypath
-      @timeformat = config['timeformat']  # Used for strftime in generating HTML
-
-      @categorydate = config['categorydate']  # Used for strftime in generating HTML
-
+      @deploypath   = Pathname.new(config['deploypath'])  # Deploy directory
+      @baseuri      = config['baseuri']       # WWW base path (Must be same location as @deploypath)
+      @timeformat   = config['timeformat']    # Article modification date format
+      @categorydate = config['categorydate']  # Article modification date format for category page
 
       # Validation
       err = []
