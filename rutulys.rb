@@ -65,6 +65,8 @@ module Rutulys
 
     # Load configuration file {{{
     def loadconfig
+      # Initial validation
+      Log::err "Library path (#{librarypath}) does not exist or is not readable." unless librarypath.readable?
 
       # Set default value
       config ={
