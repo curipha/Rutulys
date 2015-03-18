@@ -418,7 +418,7 @@ r = Rutulys::Main.new
 mode = :nop
 
 OptionParser.new do |op|
-  op.version = '0.1.1'
+  op.version = '0.1.2'
 
   op.on('--verbose', 'Verbose mode') {|flag|
     Rutulys::config.verbose = flag
