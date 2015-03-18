@@ -379,8 +379,8 @@ module Rutulys
 
     # Display log message
     def log(*msgarr)
-      msgarr.flatten.each {|msg|
-        MUTEX.synchronize { warn "[#{Time.now.strftime('%H:%M:%S.%04N')}] #{yield(msg)}" }
+      MUTEX.synchronize {
+        msgarr.flatten.each {|msg| warn "[#{Time.now.strftime('%H:%M:%S.%04N')}] #{yield(msg)}" }
       }
     end
   end
