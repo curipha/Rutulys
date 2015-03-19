@@ -107,6 +107,9 @@ module Rutulys
     attr_accessor :next, :prev
 
     def initialize(*args)
+      @name  = ''
+      @title = ''
+      @mtime = Time.at(0)
       @category = []
     end
   end
