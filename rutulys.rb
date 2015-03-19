@@ -103,7 +103,7 @@ module Rutulys
 
   # Page class {{{
   class Page
-    attr_reader   :path, :name, :title, :mtime, :category
+    attr_reader   :name, :title, :mtime, :category
     attr_accessor :next, :prev
 
     def initialize(*args)
@@ -116,7 +116,7 @@ module Rutulys
     YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
     CATEGORY_PATTERN  = /\A[0-9A-Za-z-]+\z/u
 
-    attr_reader :yaml
+    attr_reader :path, :yaml
 
     def initialize(path)
       super
