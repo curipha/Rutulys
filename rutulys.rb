@@ -185,6 +185,8 @@ module Rutulys
 
     def add(article)
       @articles << article
+
+      @mtime = article.mtime if article.mtime > @mtime
     end
     def count
       return @articles.length
