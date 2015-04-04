@@ -299,9 +299,9 @@ module Rutulys
 
       # Prepare template cache
       @html_template ||= Rutulys::config.templatepath.read(mode: 'rb:utf-8').gsub(/(%[^\{])/, '%\1')
-      @category_list ||= @category.inject([]) {|result, category|
+      @category_list ||= @category.inject(['<ul>']) {|result, category|
         result << "<li>#{Util::build_link(category.link, category.pname)} <small>#{category.count}</small></li>"
-      }.join("\n")
+      }.push('</ul>').join("\n")
 
       # Generate page caches
       queue = Queue.new

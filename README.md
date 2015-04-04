@@ -143,7 +143,7 @@ It will be replaced by the category list of this site.
 
 ```HTML
 <footer>
-  <ul>%{categlist}</ul>
+  %{categlist}
 </footer>
 ```
 
