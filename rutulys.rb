@@ -334,7 +334,7 @@ module Rutulys
     # Create cache file {{{
     def create_cache(entry)
       content = @render.render(entry.content).strip
-      Log::msgr "Empty cache file will be created for #{entry.path}" if content.empty?
+      Log::msgr "Empty cache file will be created for #{entry.cache}" if content.empty?
 
       Util::write(Rutulys::config.cachepath(entry.cache),
         sprintf(@html_template, {
@@ -349,7 +349,7 @@ module Rutulys
         })
       )
 
-      Log::msg "Create a cache file for: #{entry.path || '-'} (#{entry.title})"
+      Log::msg "Create a cache file for: #{entry.cache} (#{entry.title})"
     end
     #}}}
   end
