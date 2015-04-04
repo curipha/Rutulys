@@ -85,7 +85,7 @@ module Rutulys
         Log::msgr "Configuration file (#{configpath}) does not exist or is not readable."
       end
 
-      @deploypath   = Pathname.new(config['deploypath'])  # Deploy directory
+      @deploypath   = Pathname.new(config['deploypath']).expand_path  # Deploy directory
       @baseuri      = config['baseuri']       # WWW base path (Must be same location as @deploypath)
       @timeformat   = config['timeformat']    # Article modification date format
       @categorydate = config['categorydate']  # Article modification date format for category page
