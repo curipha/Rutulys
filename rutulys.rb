@@ -87,9 +87,9 @@ module Rutulys
 
       @deploypath   = Pathname.new(config['deploypath']).expand_path  # Deploy directory
       @baseuri      = config['baseuri'].sub(/\/$/u, '').strip # WWW base path (Must be same location as @deploypath)
-      @timeformat   = config['timeformat']    # Article modification date format
-      @categorydate = config['categorydate']  # Article modification date format for category page
-      @categoryname = config['categoryname']  # Category name list for displaying categories more pretty
+      @timeformat   = config['timeformat'].strip    # Article modification date format
+      @categorydate = config['categorydate'].strip  # Article modification date format for category page
+      @categoryname = config['categoryname']        # Category name list for displaying categories more pretty
 
       # Validation
       err = []
