@@ -130,7 +130,7 @@ module Rutulys
 
       load_yamlheader
 
-      @title ||= @name                        # Title
+      @title = @name if @title.empty?         # Title
     end
 
     def cache
