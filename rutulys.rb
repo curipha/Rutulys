@@ -339,6 +339,7 @@ module Rutulys
       Util::write(Rutulys::config.cachepath(entry.cache),
         sprintf(@html_template, {
           title:     Util::htmlescape(entry.title),
+          link:      Util::htmlescape(entry.link),
           category:  entry.category.sort.inject([]) {|list, cat| list << Util::build_link(cat.link, cat.name)}.join("\n"),
           canonical: Util::htmlescape(Rutulys::config.baseuri + entry.link),
           modified:  entry.mtime.nil? ? '' : Util::htmlescape(entry.mtime.strftime(Rutulys::config.timeformat)),

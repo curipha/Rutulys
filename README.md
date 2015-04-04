@@ -114,6 +114,13 @@ This string is prepared for search engine bot.
 <link rel="canonical" href="%{canonical}" />
 ```
 
+##### `%{link}`
+It will be replaced by the relative path to this document.
+
+```HTML
+<h1><a href="%{link}">%{title}</a></h1>
+```
+
 ##### `%{next}`, `%{prev}`
 It will be replaced by the navigation link.
 If it is the newest or oldest file, the text will be blank.
