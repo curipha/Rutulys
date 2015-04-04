@@ -237,6 +237,7 @@ module Rutulys
         no_intra_emphasis: true,
         tables: true,
         fenced_code_blocks: true,
+        autolink: true,
         disable_indented_code_blocks: true,
         space_after_headers: true,
         superscript: true
