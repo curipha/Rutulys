@@ -117,7 +117,7 @@ module Rutulys
   # Article class {{{
   class Article < Page
     YAML_FRONT_MATTER = /\A---\n.*?\n?^---$/mu
-    CATEGORY_PATTERN  = /\A[0-9A-Za-z-]+\z/u
+    CATEGORY_PATTERN  = /\A[0-9A-Za-z_-]+\z/u
 
     attr_reader :path, :yaml
 
