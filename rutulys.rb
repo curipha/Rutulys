@@ -163,9 +163,16 @@ module Rutulys
           @title = front['title'].strip unless front['title'].to_s.empty?
 
           unless front['category'].nil?
-            @category = front['category'].to_s.split(' ').uniq.inject([]) {|result, category|
-              (category =~ CATEGORY_PATTERN) ? result << Rutulys::Category.new(category) : result
+            categories = []
+            front['category'].to_s.split(' ').uniq.each {|category|
+              if category =~ CATEGORY_PATTERN then
+                categories << Rutulys::Category.new(category)
+              else
+                Log::msgr "Category '#{category}' (#{@path}) has invalid format."
+              end
             }
+
+            @category = categories
           end
         end
       end
