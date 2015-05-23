@@ -287,11 +287,13 @@ module Rutulys
         }
       }
 
-      [articles, categories].each {|index|
-        index.sort.each_cons(2) {|current, previous|
-          current.prev  = previous
-          previous.next = current
-        }
+      articles.sort.each_cons(2) {|current, previous|
+        current.prev  = previous
+        previous.next = current
+      }
+      categories.sort.each_cons(2) {|current, subsequent|
+        current.next    = subsequent
+        subsequent.prev = current
       }
       @index    = articles.sort.freeze
       @category = categories.sort.freeze
