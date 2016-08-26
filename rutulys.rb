@@ -34,7 +34,7 @@ module Rutulys
 
       # Configurable variables
       @verbose = false
-      @threads = 4
+      @threads = 1
 
       loadconfig
     end
